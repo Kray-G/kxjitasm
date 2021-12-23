@@ -1,0 +1,174 @@
+using Jit;
+
+class Jitasm(lexer_) {
+    lexer_ ??= Jitasm.lexer;
+    var labels_, pendings_;
+    var regs_ = {
+        "R": [Jit.R0, Jit.R1, Jit.R2, Jit.R3, Jit.R4, Jit.R5],
+        "S": [Jit.S0, Jit.S1, Jit.S2, Jit.S3, Jit.S4, Jit.S5],
+        "FR": [Jit.FR0, Jit.FR1, Jit.FR2, Jit.FR3, Jit.FR4, Jit.FR5],
+        "FS": [Jit.FS0, Jit.FS1, Jit.FS2, Jit.FS3, Jit.FS4, Jit.FS5],
+    };
+
+    private get(val) {
+        if (val.type == "R" || val.type == "S") {
+            var r = regs_[val.type][val.n];
+            if (r.isUndefined) {
+                throw RuntimeException("Invalid register");
+            }
+            return r;
+        }
+        if (val.type == "I") {
+            return Jit.IMM(val.v);
+        }
+        throw RuntimeException("Invalid operand");
+    }
+
+    private comp(c, cmd, label, op1, op2) {
+        var target = c[cmd](get(op1), get(op2));
+        if (labels_[label].label) {
+            target.setLabel(labels_[label].label);
+        } else {
+            pendings_.push((&(name, target) => {
+                return function() {
+                    if (labels_[name].label.isUndefined) {
+                        throw RuntimeException("Function not found: " + name);
+                    }
+                    target.setLabel(labels_[name].label);
+                };
+            })(label, target));
+        }
+    }
+
+    private calljmp(c, cmd, label, prop, msg) {
+        if (labels_[label][prop]) {
+            c.call(labels_[label][prop]);
+        } else {
+            var target = c.call();
+            pendings_.push((&(name, target) => {
+                return function() {
+                    if (labels_[name][prop].isUndefined) {
+                        throw RuntimeException(msg);
+                    }
+                    target.setLabel(labels_[name][prop]);
+                };
+            })(label, target));
+        }
+    }
+
+    private gen1(c, cmd, op1) {
+        c[cmd](get(op1));
+    }
+
+    private gen2(c, cmd, op1, op2) {
+        c[cmd](get(op1), get(op2));
+    }
+
+    private gen3(c, cmd, op1, op2, op3) {
+        c[cmd](get(op1), get(op2), get(op3));
+    }
+
+    private compile(list) {
+        # list.each { System.println(_1.toJsonString()); };
+
+        var c = new Jit.Compiler();
+        list.each {
+            var ops = _1.operand;
+            var op0 = ops[0];
+            switch (_1.cmd) {
+            case FUNC:
+                if (labels_[op0.name].entry.isDefined) {
+                    throw RuntimeException("Duplicated function name");
+                }
+                labels_[op0.name].entry = c.enter();
+                break;
+            case LABEL:
+                if (labels_[op0.name].label.isUndefined) {
+                    labels_[op0.name].label = c.label();
+                }
+                break;
+
+            case JMP:
+                calljmp(c, _1.name, op0.name, "label", "Label not found: " + op0.name);
+                break;
+            case CALL:
+                calljmp(c, _1.name, op0.name, "entry", "Function not found: " + op0.name);
+                break;
+
+            case RET:
+                gen1(c, _1.name, ops[0] ?? { type: "R", n: 0 });
+                break;
+
+            case ADD:
+            case SUB:
+            case MUL:
+                gen3(c, _1.name, ops[0], ops[1], ops[2]);
+                break;
+            case DIV:
+                c.div();
+                break;
+            case SDIV:
+                c.sdiv();
+                break;
+            case MOD:
+                c.divmod();
+                break;
+            case SMOD:
+                c.sdivmod();
+                break;
+
+            case EQ:
+            case NEQ:
+            case GE:
+            case LE:
+            case GT:
+            case LT:
+            case SGE:
+            case SLE:
+            case SGT:
+            case SLT:
+                comp(c, _1.name, op0.name, ops[1], ops[2]);
+                break;
+
+            case NOT:
+                gen1(c, _1.name, ops[0]);
+                break;
+
+            case MOV:
+            case NEG:
+            case CLZ:
+            case AND:
+            case OR:
+            case XOR:
+            case SHL:
+            case LSHR:
+            case ASHR:
+                gen2(c, _1.name, ops[0], ops[1]);
+                break;
+
+            default:
+                break;
+            }
+        };
+
+        pendings_.each { => _1() };
+        return c.generate();
+    }
+
+    public parse(asmcode) {
+        labels_ = [];
+        pendings_ = [];
+
+        /* Parser */
+        var parser = new Kacc.Parser(lexer_, {
+            yyerror: &(msg) => System.println(("ERROR! " + msg).red().bold()),
+        });
+
+        var ret;
+        parser.parse(asmcode, { &(r)
+            ret = r;
+        });
+        return compile(ret);
+    }
+
+}
