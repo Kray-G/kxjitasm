@@ -1,4 +1,4 @@
-/* Calculator in Kacc. */
+/* JIT assember */
 
 %{
 using @kacc.Lexer;
