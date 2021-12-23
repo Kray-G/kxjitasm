@@ -130,13 +130,13 @@ class Jitasm(lexer_) {
                 comp(c, _1.name, op0.name, ops[1], ops[2]);
                 break;
 
+            case NEG:
+            case CLZ:
             case NOT:
                 gen1(c, _1.name, ops[0]);
                 break;
 
             case MOV:
-            case NEG:
-            case CLZ:
             case AND:
             case OR:
             case XOR:
