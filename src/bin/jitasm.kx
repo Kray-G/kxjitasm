@@ -1,0 +1,2 @@
+# This is a sample hook script file. Feel free to modify this, and it'll be an executable automatically.
+System.println("Welcome to the package of jitasm.");
