@@ -118,6 +118,6 @@ Some instructions could be replaced by alternative way. Look at the following ta
 | `sgt LABEL, OP1, OP2` | `if signed OP1 > OP2 goto LABEL`  |
 | `slt LABEL, OP1, OP2` | `if signed OP1 < OP2 goto LABEL`  |
 
-# Licanse
+# license
 
 This product is published under MIT license.
