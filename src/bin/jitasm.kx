@@ -1,2 +1,49 @@
-# This is a sample hook script file. Feel free to modify this, and it'll be an executable automatically.
-System.println("Welcome to the package of jitasm.");
+
+using @jitasm.Jitasm;
+
+function usage() {
+    $stderr.println("Usage: kxjitasm [-h] asm.k");
+    $stderr.println("    -h          Displays this help.");
+    return 1;
+}
+
+const isWindows = System.PLATFORM.endsWith("-WIN");
+var file, opt, opts;
+var args = $$;
+args.shift();
+while (opt = System.getopt(args, "hd")) {
+    switch (opt.type) {
+    case 'h':
+        return usage();
+    case 'd':
+        opts.dump = true;
+        break;
+    case '-': {
+        file = isWindows ? opt.arg.replace("\\", "/") : opt.arg;
+        if (!File.exists(file)) {
+            $stderr.println("File not found: " + file);
+            return 1;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+if (!file) {
+    return usage();
+}
+
+var jitasm = new Jitasm();
+var code = jitasm.parse(File.load(file).trimRight() + '\n');
+if (!code) {
+    return 1;
+}
+
+if (opts.dump) {
+    code.dump();
+    return 0;
+}
+
+return code.run();
