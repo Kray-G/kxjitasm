@@ -4,7 +4,8 @@ using @jitasm.Jitasm;
 var jitasm = new Jitasm();
 var code = jitasm.parse(
     "func entry1\n"
-    "    ge label1, s0, 3\n"
+    # "    sge label1, s0, 3\n"
+    "    if signed s0 >= 3 goto label1\n"
     "    ret s0\n"
     "label1:\n"
     "    sub r0, s0, 2\n"
