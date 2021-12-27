@@ -62,7 +62,7 @@ Although it has a limitation, you can use C Runtime functions. The limitation is
 
 ```asm
 load func printf
-data @fmt "fib(%lld) = %lld\n"
+@fmt "fib(%lld) = %lld\n"
 
 func main
     mov s0, 1
@@ -100,13 +100,16 @@ func entryname
 
 You can use the following instructions independent of a function scope.
 
-|  Instruction  | Operands |               Meaning                |                     Remark                     |
-| ------------- | -------- | ------------------------------------ | ---------------------------------------------- |
-| `load` `func` | NAME     | Load a function as a C function.     | The search library is CRT by default.          |
-| `load` `lib`  | NAME     | Load and add a dynamic link library. | This library is added to the search library.   |
-| `data`        | DATA     | Constant data store.                 | As DATA, it is supported a string or a binary. |
+|  Instruction  |  Operands  |               Meaning                |                     Remark                     |
+| ------------- | ---------- | ------------------------------------ | ---------------------------------------------- |
+| `load` `func` | NAME       | Load a function as a C function.     | The search library is CRT by default.          |
+| `load` `lib`  | NAME       | Load and add a dynamic link library. | This library is added to the search library.   |
+| `@`           | LABEL DATA | A constant data store.               | As DATA, it is supported a string or a binary. |
 
-A string should be `"..."` style, and a binary should be `<...>` style.
+Regarding a constant data store, there are following rules.
+
+* LABEL should be used with `@` plus LABEL like `@fmt`.
+* A string should be `"..."` style, and a binary should be `<...>` style.
 
 ### Instructions
 

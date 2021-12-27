@@ -1,5 +1,5 @@
 load func printf
-data @fmt "fib(%lld) = %lld\n"
+@fmt "fib(%lld) = %lld\n"
 
 func main
     mov s0, 1

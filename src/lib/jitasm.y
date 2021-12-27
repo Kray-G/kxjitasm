@@ -34,7 +34,7 @@ line
     | JMP LABEL '\n' { $$ = { "cmd": JMP, "name": "jmp", "operand": [{ "name": $2.value }] }; }
     | LOAD FUNC LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": $3.value }] }; }
     | LOAD LIB LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": $3.value }] }; }
-    | DATA '@' LABEL data { $$ = { "cmd": DATA, "name": "data", "operand": [{ "name": $3.value, "value": $4.value }] }; }
+    | '@' LABEL data { $$ = { "cmd": DATA, "name": "data", "operand": [{ "name": $2.value, "value": $3.value }] }; }
     | alternatives '\n'
     | error '\n' { $$.error = true; }
     ;
@@ -109,7 +109,6 @@ class Jitasm(opts_) {
         lexer_ = new Kacc.Lexer();
         lexer_.addSkip(/[ \t\r]+|#[^\r\n]+/);
         lexer_.addKeyword("load", LOAD);
-        lexer_.addKeyword("data", DATA);
         lexer_.addKeyword("==", OPEQ);
         lexer_.addKeyword("!=", OPNEQ);
         lexer_.addKeyword(">=", OPGE);
