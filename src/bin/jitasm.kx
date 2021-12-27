@@ -3,7 +3,11 @@ using @jitasm.Jitasm;
 
 function usage() {
     $stderr.println("Usage: kxjitasm [-h] asm.k");
-    $stderr.println("    -h          Displays this help.");
+    $stderr.println("    -h          Display this help.");
+    $stderr.println("    -d          Dump actual assemble list.");
+    $stderr.println("    -r          Run with JIT.");
+    $stderr.println("    -x          Run with JIT, and display the result.");
+    $stderr.println("    -m          Measure some metrics.");
     return 1;
 }
 
@@ -11,12 +15,25 @@ const isWindows = System.PLATFORM.endsWith("-WIN");
 var file, opt, opts;
 var args = $$;
 args.shift();
-while (opt = System.getopt(args, "hd")) {
+while (opt = System.getopt(args, "hdrx", { debug: '=' })) {
     switch (opt.type) {
     case 'h':
         return usage();
     case 'd':
         opts.dump = true;
+        break;
+    case 'r':
+        opts.jitRun = true;
+        break;
+    case 'x':
+        opts.jitRun = true;
+        opts.printResult = true;
+        break;
+    case 'm':
+        opts.metrics = true;
+        break;
+    case 'debug':
+        opts.debug[opt.arg] = true;
         break;
     case '-': {
         file = isWindows ? opt.arg.replace("\\", "/") : opt.arg;
@@ -35,15 +52,20 @@ if (!file) {
     return usage();
 }
 
-var jitasm = new Jitasm();
-var code = jitasm.parse(File.load(file).trimRight() + '\n');
-if (!code) {
+var jitasm = new Jitasm(opts);
+var list = jitasm.parse(File.load(file));
+if (!list) {
     return 1;
 }
 
 if (opts.dump) {
-    code.dump();
-    return 0;
+    jitasm.dump(list);
 }
 
-return code.run();
+if (opts.jitRun) {
+    var r = jitasm.run(list);
+    if (opts.printResult) {
+        System.println(r);
+    }
+    return r;
+}

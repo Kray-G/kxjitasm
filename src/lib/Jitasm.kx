@@ -3,53 +3,79 @@
 using @kacc.Lexer;
 
 const YYERRTOK = 256;
-const CMD = 257;
-const FUNC = 258;
-const LABEL = 259;
-const IF = 260;
-const JMP = 261;
-const CALL = 262;
-const RET = 263;
-const MOV = 264;
-const NEG = 265;
-const CLZ = 266;
-const ADD = 267;
-const SUB = 268;
-const MUL = 269;
-const DIV = 270;
-const SDIV = 271;
-const MOD = 272;
-const SMOD = 273;
-const NOT = 274;
-const AND = 275;
-const OR = 276;
-const XOR = 277;
-const SHL = 278;
-const LSHR = 279;
-const ASHR = 280;
-const EQ = 281;
-const NEQ = 282;
-const GE = 283;
-const LE = 284;
-const GT = 285;
-const LT = 286;
-const SGE = 287;
-const SLE = 288;
-const SGT = 289;
-const SLT = 290;
-const SREG = 291;
-const RREG = 292;
-const VAR = 293;
-const ARG = 294;
-const INT = 295;
-const DBL = 296;
-const SW = 297;
-const FP = 298;
-const SIGNED = 299;
-const OPEQ = 300;
-const OPNEQ = 301;
-const OPGE = 302;
-const OPLE = 303;
+const LOAD = 257;
+const DATA = 258;
+const STR = 259;
+const CMD = 260;
+const FUNC = 261;
+const LIB = 262;
+const LABEL = 263;
+const IF = 264;
+const JMP = 265;
+const CALL = 266;
+const RET = 267;
+const FMOV32 = 268;
+const FMOV = 269;
+const MOV8S = 270;
+const MOV16S = 271;
+const MOV32S = 272;
+const MOV8 = 273;
+const MOV16 = 274;
+const MOV32 = 275;
+const MOV = 276;
+const NOT32 = 277;
+const NEG32 = 278;
+const CLZ32 = 279;
+const NOT = 280;
+const NEG = 281;
+const CLZ = 282;
+const ADD32 = 283;
+const SUB32 = 284;
+const MUL32 = 285;
+const DIV32 = 286;
+const SDIV32 = 287;
+const MOD32 = 288;
+const SMOD32 = 289;
+const AND32 = 290;
+const OR32 = 291;
+const XOR32 = 292;
+const SHL32 = 293;
+const LSHR32 = 294;
+const ASHR32 = 295;
+const ADD = 296;
+const SUB = 297;
+const MUL = 298;
+const DIV = 299;
+const SDIV = 300;
+const MOD = 301;
+const SMOD = 302;
+const AND = 303;
+const OR = 304;
+const XOR = 305;
+const SHL = 306;
+const LSHR = 307;
+const ASHR = 308;
+const EQ = 309;
+const NEQ = 310;
+const GE = 311;
+const LE = 312;
+const GT = 313;
+const LT = 314;
+const SGE = 315;
+const SLE = 316;
+const SGT = 317;
+const SLT = 318;
+const SREG = 319;
+const RREG = 320;
+const VAR = 321;
+const ARG = 322;
+const INT = 323;
+const DBL = 324;
+const SIGNED = 325;
+const OPEQ = 326;
+const OPNEQ = 327;
+const OPGE = 328;
+const OPLE = 329;
 
 namespace Kacc {
 
@@ -87,124 +113,140 @@ class Parser(lexer_, opts_) {
 
 
     const yytranslate = [
-            0,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           18,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   20,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   19,   25,
-           24,   25,   23,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   21,   25,   22,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,    1,    2,    3,    4,
-            5,    6,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,   25,   25,   25,   25,   25,   25,   25,   25,   25,
-           25,    7,    8,    9,   10,   11,   12,   25,   25,   13,
-           14,   15,   16,   17
+            0,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           22,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   30,   27,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   23,   31,
+           25,   31,   26,   31,   24,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   28,   31,   29,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,    1,    2,    3,    4,
+            5,    6,    7,    8,    9,   10,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+           31,   31,   31,   31,   31,   31,   31,   31,   31,   11,
+           12,   13,   14,   15,   16,   17,   18,   19,   20,   21
     ];
 
-    const YYBADCH = 25;
-    const YYMAXLEX = 304;
-    const YYTERMS = 25;
-    const YYNONTERMS = 8;
+    const YYBADCH = 31;
+    const YYMAXLEX = 330;
+    const YYTERMS = 31;
+    const YYNONTERMS = 11;
 
     const yyaction = [
-           18,    3,   19,   20,    2,   21,   76,   -1,    0,   70,
-           71,   24,   25,   72,   73,   83,   82,   59,    6,    7,
-            8,    9,   12,   13,   84,   80,   79,   10,   11,   14,
-           15,   78,   85,   86,   77,   81,   28,   30,    4,    5,
-           47,   48,   49,   50,   51,   52,   53,   54,   45,   46,
-            0,    0,    0,    0,    0,   33,   34,    0,    0,    0,
-            0,    0,    0,    0,   63,   60,   61,   62,   64,   65,
-            0,   29,    0,    0,   31,   32,    0,   74,   75
+           25,   19,   26,  109,    3,   27,    0,   28,    2,   29,
+          101,   32,   33,   93,   94,   35,   36,   97,   98,   85,
+           -1,   75,  110,   12,   13,  108,   37,  107,   14,   15,
+           20,    6,    7,    8,    9,   22,   23,  106,   10,   11,
+           24,  105,   86,   66,  102,  111,  112,   81,   80,  114,
+           42,   40,  113,   18,   79,   34,   61,   62,   63,   64,
+           65,   67,   68,   69,   70,   60,    0,    0,    0,    0,
+            0,  104,   87,   45,   46,   88,    0,    0,    4,    0,
+            0,    0,    0,    0,   76,   77,   78,   83,   84,    0,
+           41,    0,    0,    0,    0,    5,    0,   43,   44,    0,
+           96,   95,  100,   99,    0,   47
     ];
 
-    const YYLAST = 79;
+    const YYLAST = 106;
 
     const yycheck = [
-            1,    2,    3,    4,    5,    6,    4,    0,    0,    7,
-            8,    9,   10,   11,   12,    4,    4,   18,   14,   15,
-           16,   17,   16,   17,    4,    4,    4,   23,   24,   23,
-           24,    4,    4,    4,    4,    4,    4,    4,   13,   20,
-            6,    6,    6,    6,    6,    6,    6,    6,    6,    6,
-           -1,   -1,   -1,   -1,   -1,   11,   11,   -1,   -1,   -1,
-           -1,   -1,   -1,   -1,   18,   18,   18,   18,   18,   18,
-           -1,   19,   -1,   -1,   21,   21,   -1,   22,   22
+            1,    2,    3,    8,    5,    6,    0,    8,    9,   10,
+            8,    6,    7,   11,   12,   13,   14,   15,   16,    4,
+            0,   22,    8,   20,   21,    8,   24,    8,   25,   26,
+           28,   18,   19,   20,   21,   11,   12,    8,   25,   26,
+           25,    8,   26,   27,    8,    8,    8,    8,    8,    8,
+            8,    8,    8,    8,   22,   24,   10,   10,   10,   10,
+           10,   10,   10,   10,   10,   10,   -1,   -1,   -1,   -1,
+           -1,   15,   15,   15,   15,   15,   -1,   -1,   17,   -1,
+           -1,   -1,   -1,   -1,   22,   22,   22,   22,   22,   -1,
+           23,   -1,   -1,   -1,   -1,   27,   -1,   28,   28,   -1,
+           29,   29,   29,   29,   -1,   30
     ];
 
     const yybase = [
-           -1,    7,   25,    2,    2,    2,    2,    2,    2,    2,
-            2,    2,    2,    2,    2,    2,    4,    6,   51,   32,
-           52,   33,    8,   50,   53,   54,   49,   19,   48,   47,
-           46,   44,   45,   55,   56,   42,   43,   34,   35,   36,
-           37,   38,   39,   40,   41,   30,   27,   22,   21,   31,
-           12,   11,   20,   28,   29,    0,   -1,    2
+           -1,   20,   61,    2,    2,    2,    2,    2,    2,    2,
+            2,    2,    2,    2,    2,    2,   13,    3,   15,    5,
+           24,   16,   75,   75,   57,   66,   31,   43,   67,   42,
+            6,   65,   40,   39,   45,   69,   70,   36,   64,   68,
+           63,   62,   32,   58,   59,   74,   73,   56,   72,   71,
+           55,   46,   47,   48,   49,   50,   51,   52,   53,   54,
+           33,   29,   19,   17,   14,   -5,   60,   37,   38,   41,
+           44,    0,   -1,    2
     ];
 
     const YY2TBLSTATE = 3;
 
     const yydefault = [
-        32767,32767,32767,   11,32767,32767,32767,32767,32767,32767,
+        32767,32767,32767,   18,32767,32767,32767,32767,32767,32767,
         32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,
-        32767,32767,32767,32767,32767,32767,32767,   12,32767,32767,
+        32767,32767,   32,   32,32767,32767,32767,32767,32767,32767,
+        32767,32767,32767,32767,32767,32767,32767,32767,32767,   19,
         32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,
         32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,
-        32767,32767,32767,32767,32767
+        32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,
+        32767
     ];
 
     const yygoto = [
-           68,   17,   69,   35,   36,   37,   38,   39,   40,   41,
-           42,   43,   44,   58
+           91,   17,   92,   50,   51,   52,   53,   54,   55,   56,
+           57,   58,   59,   74,   49
     ];
 
-    const YYGLAST = 14;
+    const YYGLAST = 15;
 
     const yygcheck = [
-            7,    7,    7,    7,    7,    7,    7,    7,    7,    7,
-            7,    7,    7,    3
+            9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+            9,    9,    9,    3,   10
     ];
 
     const yygbase = [
-            0,    0,    0,   12,    0,    0,    0,   -3
+            0,    0,    0,   12,    0,    0,    0,    0,    0,   -3,
+           -9
     ];
 
     const yygdefault = [
-        -32768,   22,    1,   57,   26,   23,   27,   16
+        -32768,   30,    1,   73,   38,   82,   31,   21,   39,   16,
+           48
     ];
 
     const yylhs = [
             0,    1,    2,    2,    3,    3,    3,    3,    3,    3,
-            3,    4,    4,    6,    6,    7,    7,    7,    7,    7,
-            7,    7,    5,    5,    5,    5,    5,    5,    5,    5,
-            5,    5
+            3,    3,    3,    3,    5,    5,    7,    7,    4,    4,
+            8,    8,    9,    9,    9,    9,    9,    9,    9,    9,
+            9,    9,   10,   10,    6,    6,    6,    6,    6,    6,
+            6,    6,    6,    6
     ];
 
     const yylen = [
-            1,    1,    1,    2,    1,    3,    3,    3,    3,    2,
-            2,    0,    1,    1,    3,    1,    1,    1,    1,    4,
-            4,    1,    6,    6,    6,    6,    6,    6,    7,    7,
-            7,    7
+            1,    1,    1,    2,    1,    3,    3,    3,    3,    3,
+            3,    4,    2,    2,    1,    3,    1,    3,    0,    1,
+            1,    3,    1,    1,    4,    4,    1,    1,    4,    4,
+            1,    2,    0,    2,    6,    6,    6,    6,    6,    6,
+            7,    7,    7,    7
     ];
 
-    const YYSTATES = 83;
-    const YYNLSTATES = 55;
+    const YYSTATES = 110;
+    const YYNLSTATES = 71;
     const YYINTERRTOK = 1;
     const YYUNEXPECTED = 32767;
     const YYDEFAULT = -32766;
@@ -297,47 +339,69 @@ class Parser(lexer_, opts_) {
 { yyval = { "cmd": yyastk[yysp-(3-1)].value, "name": yyastk[yysp-(3-1)].name, "operand": yyastk[yysp-(3-2)] }; } break;
                     case 8:
 { yyval = { "cmd": JMP, "name": "jmp", "operand": [{ "name": yyastk[yysp-(3-2)].value }] }; } break;
+                    case 9:
+{ yyval = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": yyastk[yysp-(3-3)].value }] }; } break;
                     case 10:
-{ yyval.error = true; } break;
+{ yyval = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": yyastk[yysp-(3-3)].value }] }; } break;
                     case 11:
-{ yyval = []; } break;
+{ yyval = { "cmd": DATA, "name": "data", "operand": [{ "name": yyastk[yysp-(4-3)].value, "value": yyastk[yysp-(4-4)].value }] }; } break;
                     case 13:
-{ yyval = [yyastk[yysp-(1-1)]]; } break;
-                    case 14:
-{ yyval.push(yyastk[yysp-(3-3)]); } break;
+{ yyval.error = true; } break;
                     case 15:
-{ yyval = { "type": "S", "n": yyastk[yysp-(1-1)].value }; } break;
+{ yyval.value = <...yyastk[yysp-(3-2)]>; } break;
                     case 16:
-{ yyval = { "type": "R", "n": yyastk[yysp-(1-1)].value }; } break;
+{ yyval = [yyastk[yysp-(1-1)].value]; } break;
                     case 17:
-{ yyval = { "type": "I", "v": yyastk[yysp-(1-1)].value }; } break;
+{ yyval.push(yyastk[yysp-(3-3)].value); } break;
                     case 18:
-{ yyval = { "type": "D", "v": yyastk[yysp-(1-1)].value }; } break;
-                    case 19:
-{ yyval = { "type": "V", "offset": yyastk[yysp-(4-3)].value }; } break;
+{ yyval = []; } break;
                     case 20:
-{ yyval = { "type": "A", "offset": yyastk[yysp-(4-3)].value }; } break;
+{ yyval = [yyastk[yysp-(1-1)]]; } break;
                     case 21:
-{ yyval = { "type": "L", "name": yyastk[yysp-(1-1)].value }; } break;
+{ yyval.push(yyastk[yysp-(3-3)]); } break;
                     case 22:
-{ yyval = { "cmd": EQ, "name": "eq", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+{ yyval = { "type": "S", "n": yyastk[yysp-(1-1)].value }; } break;
                     case 23:
-{ yyval = { "cmd": NEQ, "name": "neq", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+{ yyval = { "type": "R", "n": yyastk[yysp-(1-1)].value }; } break;
                     case 24:
-{ yyval = { "cmd": GE, "name": "ge", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+{ yyval = { "type": "DS", "n": yyastk[yysp-(4-2)].value, "offset": yyastk[yysp-(4-3)].value }; } break;
                     case 25:
-{ yyval = { "cmd": LE, "name": "le", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+{ yyval = { "type": "DR", "n": yyastk[yysp-(4-2)].value, "offset": yyastk[yysp-(4-3)].value }; } break;
                     case 26:
-{ yyval = { "cmd": GT, "name": "gt", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+{ yyval = { "type": "I", "v": yyastk[yysp-(1-1)].value }; } break;
                     case 27:
-{ yyval = { "cmd": LT, "name": "lt", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+{ yyval = { "type": "D", "v": yyastk[yysp-(1-1)].value }; } break;
                     case 28:
-{ yyval = { "cmd": SGE, "name": "sge", "operand": [{ "type": "L", "name": yyastk[yysp-(7-7)].value }, yyastk[yysp-(7-3)], yyastk[yysp-(7-5)]] }; } break;
+{ yyval = { "type": "V", "offset": yyastk[yysp-(4-3)].value }; } break;
                     case 29:
-{ yyval = { "cmd": SLE, "name": "sle", "operand": [{ "type": "L", "name": yyastk[yysp-(7-7)].value }, yyastk[yysp-(7-3)], yyastk[yysp-(7-5)]] }; } break;
+{ yyval = { "type": "A", "offset": yyastk[yysp-(4-3)].value }; } break;
                     case 30:
-{ yyval = { "cmd": SGT, "name": "sgt", "operand": [{ "type": "L", "name": yyastk[yysp-(7-7)].value }, yyastk[yysp-(7-3)], yyastk[yysp-(7-5)]] }; } break;
+{ yyval = { "type": "L", "name": yyastk[yysp-(1-1)].value }; } break;
                     case 31:
+{ yyval = { "type": "A", "name": yyastk[yysp-(2-2)].value }; } break;
+                    case 32:
+{ yyval.value = 0; } break;
+                    case 33:
+{ yyval.value = yyastk[yysp-(2-2)].value; } break;
+                    case 34:
+{ yyval = { "cmd": EQ, "name": "eq", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+                    case 35:
+{ yyval = { "cmd": NEQ, "name": "neq", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+                    case 36:
+{ yyval = { "cmd": GE, "name": "ge", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+                    case 37:
+{ yyval = { "cmd": LE, "name": "le", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+                    case 38:
+{ yyval = { "cmd": GT, "name": "gt", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+                    case 39:
+{ yyval = { "cmd": LT, "name": "lt", "operand": [{ "type": "L", "name": yyastk[yysp-(6-6)].value }, yyastk[yysp-(6-2)], yyastk[yysp-(6-4)]] }; } break;
+                    case 40:
+{ yyval = { "cmd": SGE, "name": "sge", "operand": [{ "type": "L", "name": yyastk[yysp-(7-7)].value }, yyastk[yysp-(7-3)], yyastk[yysp-(7-5)]] }; } break;
+                    case 41:
+{ yyval = { "cmd": SLE, "name": "sle", "operand": [{ "type": "L", "name": yyastk[yysp-(7-7)].value }, yyastk[yysp-(7-3)], yyastk[yysp-(7-5)]] }; } break;
+                    case 42:
+{ yyval = { "cmd": SGT, "name": "sgt", "operand": [{ "type": "L", "name": yyastk[yysp-(7-7)].value }, yyastk[yysp-(7-3)], yyastk[yysp-(7-5)]] }; } break;
+                    case 43:
 { yyval = { "cmd": SLT, "name": "slt", "operand": [{ "type": "L", "name": yyastk[yysp-(7-7)].value }, yyastk[yysp-(7-3)], yyastk[yysp-(7-5)]] }; } break;
                     }
                     /* Goto - shift nonterminal */
@@ -407,81 +471,11 @@ class Parser(lexer_, opts_) {
 } // namespace Kacc
 
 
-/* Lexical analyzer */
-Jitasm.lexer = new Kacc.Lexer();
-Jitasm.lexer.addSkip(/[ \t\r]+|#[^\r\n]+/);
-Jitasm.lexer.addKeyword("==", OPEQ);
-Jitasm.lexer.addKeyword("!=", OPNEQ);
-Jitasm.lexer.addKeyword(">=", OPGE);
-Jitasm.lexer.addKeyword("<=", OPLE);
-Jitasm.lexer.addKeyword("if", IF);
-Jitasm.lexer.addKeyword("signed", SIGNED);
-Jitasm.lexer.addKeyword("func", FUNC);
-Jitasm.lexer.addKeyword("goto", JMP) { &(yylval, token)
-    yylval.value = JMP;
-    yylval.name = "jmp";
-    return token;
-};
-[
-    { "value": JMP,  "name": "jmp"  },
-    { "value": CALL, "name": "call" },
-    { "value": RET,  "name": "ret"  },
-    { "value": MOV,  "name": "mov"  },
-    { "value": NEG,  "name": "neg"  },
-    { "value": CLZ,  "name": "clz"  },
-    { "value": ADD,  "name": "add"  },
-    { "value": SUB,  "name": "sub"  },
-    { "value": MUL,  "name": "mul"  },
-    { "value": DIV,  "name": "div"  },
-    { "value": SDIV, "name": "sdiv" },
-    { "value": MOD,  "name": "mod"  },
-    { "value": SMOD, "name": "smod" },
-    { "value": SHL,  "name": "shl"  },
-    { "value": LSHR, "name": "lshr" },
-    { "value": ASHR, "name": "ashr" },
-    { "value": EQ,   "name": "eq"   },
-    { "value": NEQ,  "name": "neq"  },
-    { "value": GE,   "name": "ge"   },
-    { "value": LE,   "name": "le"   },
-    { "value": GT,   "name": "gt"   },
-    { "value": LT,   "name": "lt"   },
-    { "value": SGE,  "name": "sge"  },
-    { "value": SLE,  "name": "sle"  },
-    { "value": SGT,  "name": "sgt"  },
-    { "value": SLT,  "name": "slt"  },
-].each {
-    var key = _1;
-    Jitasm.lexer.addKeyword(_1.name, CMD) { &(yylval, token)
-        yylval.value = key.value;
-        yylval.name = key.name;
-        return token;
-    };
-};
-
-Jitasm.lexer.addRule(/var/, VAR);
-Jitasm.lexer.addRule(/arg/, ARG);
-Jitasm.lexer.addRule(/\br([0-9]+)\b/, RREG) { &(value)
-    return Integer.parseInt(value.subString(1));
-};
-Jitasm.lexer.addRule(/\bs([0-9]+)\b/, SREG) { &(value)
-    return Integer.parseInt(value.subString(1));
-};
-Jitasm.lexer.addRule(/\b[_a-zA-Z][_a-zA-Z0-9]*\b/, LABEL);
-Jitasm.lexer.addRule(/[0-9]+(\.[0-9]+([eE][-+]?[0-9]+)?)?/) { &(yylval)
-    if (yylval.value.find(".") > 0 || yylval.value.find("e") > 0 || yylval.value.find("E") > 0) {
-        yylval.value = Double.parseDouble(yylval.value);
-        return DBL;
-    }
-    yylval.value = Integer.parseInt(yylval.value);
-    return INT;
-};
-// Jitasm.lexer.debugOn(Jitasm.lexer.DEBUG_TOKEN|Jitasm.lexer.DEBUG_VALUE);
-
 using Jit;
 
-class Jitasm(lexer_) {
-    lexer_ ??= Jitasm.lexer;
-    var labels_, pendings_, error_;
+class Jitasm(opts_) {
+    var lexer_, code_;
+    var loaded_, data_, entries_, funcname_, pendings_, error_;
     var regs_ = {
         "R": [Jit.R0, Jit.R1, Jit.R2, Jit.R3, Jit.R4, Jit.R5],
         "S": [Jit.S0, Jit.S1, Jit.S2, Jit.S3, Jit.S4, Jit.S5],
@@ -489,7 +483,137 @@ class Jitasm(lexer_) {
         "FS": [Jit.FS0, Jit.FS1, Jit.FS2, Jit.FS3, Jit.FS4, Jit.FS5],
     };
 
+    private initialize() {
+        /* Lexical analyzer */
+        lexer_ = new Kacc.Lexer();
+        lexer_.addSkip(/[ \t\r]+|#[^\r\n]+/);
+        lexer_.addKeyword("load", LOAD);
+        lexer_.addKeyword("data", DATA);
+        lexer_.addKeyword("==", OPEQ);
+        lexer_.addKeyword("!=", OPNEQ);
+        lexer_.addKeyword(">=", OPGE);
+        lexer_.addKeyword("<=", OPLE);
+        lexer_.addKeyword("if", IF);
+        lexer_.addKeyword("signed", SIGNED);
+        lexer_.addKeyword("func", FUNC);
+        lexer_.addKeyword("lib", LIB);
+        lexer_.addKeyword("var", VAR);
+        lexer_.addKeyword("arg", ARG);
+        lexer_.addKeyword("goto", JMP) { &(yylval, token)
+            yylval.value = JMP;
+            yylval.name = "jmp";
+            return token;
+        };
+        [
+            { "value": JMP,    "name": "jmp"       },
+            { "value": CALL,   "name": "call"      },
+            { "value": RET,    "name": "ret"       },
+
+            { "value": MOV8S,  "name": "mov8s"     },
+            { "value": MOV16S, "name": "mov16s"    },
+            { "value": MOV32S, "name": "mov32s"    },
+            { "value": MOV8,   "name": "mov8"      },
+            { "value": MOV16,  "name": "mov16"     },
+            { "value": MOV32,  "name": "mov32"     },
+            { "value": MOV,    "name": "mov"       },
+            { "value": FMOV32, "name": "fmov32"    },
+            { "value": FMOV,   "name": "fmov"      },
+
+            { "value": NOT32,  "name": "not32"     },
+            { "value": NEG32,  "name": "neg32"     },
+            { "value": CLZ32,  "name": "clz32"     },
+            { "value": NOT,    "name": "not"       },
+            { "value": NEG,    "name": "neg"       },
+            { "value": CLZ,    "name": "clz"       },
+
+            { "value": ADD32,  "name": "add32"     },
+            { "value": SUB32,  "name": "sub32"     },
+            { "value": MUL32,  "name": "mul32"     },
+            { "value": DIV32,  "name": "div32"     },
+            { "value": SDIV32, "name": "sdiv32"    },
+            { "value": MOD32,  "name": "divmod32"  },
+            { "value": SMOD32, "name": "sdivmod32" },
+            { "value": SHL32,  "name": "shl32"     },
+            { "value": LSHR32, "name": "lshr32"    },
+            { "value": ASHR32, "name": "ashr32"    },
+            { "value": ADD,    "name": "add"       },
+            { "value": SUB,    "name": "sub"       },
+            { "value": MUL,    "name": "mul"       },
+            { "value": DIV,    "name": "div"       },
+            { "value": SDIV,   "name": "sdiv"      },
+            { "value": MOD,    "name": "divmod"    },
+            { "value": SMOD,   "name": "sdivmod"   },
+            { "value": SHL,    "name": "shl"       },
+            { "value": LSHR,   "name": "lshr"      },
+            { "value": ASHR,   "name": "ashr"      },
+
+            { "value": EQ,     "name": "eq"        },
+            { "value": NEQ,    "name": "neq"       },
+            { "value": GE,     "name": "ge"        },
+            { "value": LE,     "name": "le"        },
+            { "value": GT,     "name": "gt"        },
+            { "value": LT,     "name": "lt"        },
+            { "value": SGE,    "name": "sge"       },
+            { "value": SLE,    "name": "sle"       },
+            { "value": SGT,    "name": "sgt"       },
+            { "value": SLT,    "name": "slt"       },
+        ].each {
+            var key = _1;
+            lexer_.addKeyword(_1.name, CMD) { &(yylval, token)
+                yylval.value = key.value;
+                yylval.name = key.name;
+                return token;
+            };
+        };
+
+        lexer_.addRule(/\br([0-9]+)\b/, RREG) { &(value)
+            return Integer.parseInt(value.subString(1));
+        };
+        lexer_.addRule(/\bs([0-9]+)\b/, SREG) { &(value)
+            return Integer.parseInt(value.subString(1));
+        };
+        lexer_.addRule(/"([^\"]|\\.)*"/, STR) { &(value)
+            return value.subString(1, value.length() - 2).replace(/\\(.)/, &(g) => {
+                var c = g[1].string;
+                if (c == 'n') {
+                    return '\n';
+                }
+                if (c == 'r') {
+                    return '\r';
+                }
+                if (c == 't') {
+                    return '\t';
+                }
+                return c;
+            });
+        };
+        lexer_.addRule(/\b[_a-zA-Z][_a-zA-Z0-9]*\b/, LABEL);
+        lexer_.addRule(/0b[0-9a-fA-F]+|0x[0-9a-fA-F]+|0[0-7]*/, INT) { &(value)
+            return Integer.parseInt(value);
+        };
+        lexer_.addRule(/[1-9][0-9]*(\.[0-9]+([eE][-+]?[0-9]+)?)?/) { &(yylval)
+            if (yylval.value.find(".") > 0 || yylval.value.find("e") > 0 || yylval.value.find("E") > 0) {
+                yylval.value = Double.parseDouble(yylval.value);
+                return DBL;
+            }
+            yylval.value = Integer.parseInt(yylval.value);
+            return INT;
+        };
+        if (opts_.debug.lexer) {
+            lexer_.debugOn(lexer_.DEBUG_TOKEN|lexer_.DEBUG_VALUE);
+        }
+    }
+
     private get(val) {
+        if (val.type == "A") {
+            if (data_[val.name].isUndefined) {
+                throw RuntimeException("Undefined data: " + val.name);
+            }
+            return data_[val.name];
+        }
+        if (val.type == "I" || val.type == "D") {
+            return Jit.IMM(val.v);
+        }
         if (val.type == "R" || val.type == "S") {
             var r = regs_[val.type][val.n];
             if (r.isUndefined) {
@@ -497,41 +621,31 @@ class Jitasm(lexer_) {
             }
             return r;
         }
-        if (val.type == "I") {
-            return Jit.IMM(val.v);
+        if (val.type == "DR" || val.type == "DS") {
+            var r = regs_[val.type == "DR" ? "R" : "S"][val.n];
+            if (r.isUndefined) {
+                throw RuntimeException("Invalid register");
+            }
+            return Jit.MEM1(r, val.offset);
         }
         throw RuntimeException("Invalid operand");
     }
 
     private comp(c, cmd, label, op1, op2) {
         var target = c[cmd](get(op1), get(op2));
-        if (labels_[label].label) {
-            target.setLabel(labels_[label].label);
+        var jumpto = entries_[funcname_].labels[label];
+        if (jumpto) {
+            target.setLabel(jumpto);
         } else {
-            pendings_.push((&(name, target) => {
+            pendings_.push((&(funcname, label, target) => {
                 return function() {
-                    if (labels_[name].label.isUndefined) {
-                        throw RuntimeException("Function not found: " + name);
+                    var jumpto = entries_[funcname].labels[label];
+                    if (jumpto.isUndefined) {
+                        throw RuntimeException("Label not found: " + label + " in " + funcname);
                     }
-                    target.setLabel(labels_[name].label);
+                    target.setLabel(jumpto);
                 };
-            })(label, target));
-        }
-    }
-
-    private calljmp(c, cmd, label, prop, msg) {
-        if (labels_[label][prop]) {
-            c[cmd](labels_[label][prop]);
-        } else {
-            var target = c[cmd]();
-            pendings_.push((&(name, target) => {
-                return function() {
-                    if (labels_[name][prop].isUndefined) {
-                        throw RuntimeException(msg);
-                    }
-                    target.setLabel(labels_[name][prop]);
-                };
-            })(label, target));
+            })(funcname_, label, target));
         }
     }
 
@@ -559,7 +673,7 @@ class Jitasm(lexer_) {
         }
     }
 
-    private compile(list) {
+    private jitCompile(list) {
         // list.each { System.println(_1.toJsonString()); };
         // return;
 
@@ -568,52 +682,100 @@ class Jitasm(lexer_) {
             var ops = _1.operand;
             var op0 = ops[0];
             switch (_1.cmd) {
+            case LOAD:
+                if (op0.type == LIB) {
+                    Jit.Clib.addlib(op0.name);
+                } else if (op0.type == FUNC) {
+                    loaded_[op0.name] = Jit.Clib.load(op0.name);
+                    if (!loaded_[op0.name]) {
+                        throw RuntimeException("Loading a function failed: " + op0.name);
+                    }
+                } else {
+                    throw RuntimeException("Invalid load type");
+                }
+                break;
+            case DATA:
+                if (op0.value.isString || op0.value.isBinary) {
+                    data_[op0.name] = op0.value;
+                } else {
+                    throw RuntimeException("Invalid data type");
+                }
+                break;
+
             case FUNC:
-                if (labels_[op0.name].entry.isDefined) {
+                funcname_ = op0.name;
+                if (entries_[funcname_].entry.isDefined) {
                     throw RuntimeException("Duplicated function name");
                 }
-                labels_[op0.name].entry = c.enter();
+                entries_[funcname_].entry = c.enter();
+                entries_[funcname_].labels = {};
                 break;
             case LABEL:
-                if (labels_[op0.name].label.isUndefined) {
-                    labels_[op0.name].label = c.label();
+                if (entries_[funcname_].labels[op0.name].isUndefined) {
+                    entries_[funcname_].labels[op0.name] = c.label();
                 }
                 break;
 
             case JMP:
                 checkOprands(_1, 1);
-                calljmp(c, _1.name, op0.name, "label", "Label not found: " + op0.name);
+                var jumpto = entries_[funcname_].labels[op0.name];
+                if (jumpto) {
+                    c.jump(jumpto);
+                } else {
+                    var target = c.jmp();
+                    pendings_.push((&(funcname, label, target) => {
+                        return function() {
+                            var jumpto = entries_[funcname].labels[label];
+                            if (jumpto.isUndefined) {
+                                throw RuntimeException("Label not found: " + label + " in " + funcname);
+                            }
+                            target.setLabel(jumpto);
+                        };
+                    })(funcname_, op0.name, target));
+                }
                 break;
             case CALL:
                 checkOprands(_1, 1);
-                calljmp(c, _1.name, op0.name, "entry", "Function not found: " + op0.name);
+                if (loaded_[op0.name]) {
+                    c.icall(loaded_[op0.name]);
+                } else {
+                    var entry = entries_[op0.name].entry;
+                    if (entry) {
+                        c.call(entry);
+                    } else {
+                        var target = c.call();
+                        pendings_.push((&(name, target) => {
+                            return function() {
+                                if (entries_[name].entry.isUndefined) {
+                                    throw RuntimeException("Function not found: " + name);
+                                }
+                                target.setLabel(entries_[name].entry);
+                            };
+                        })(op0.name, target));
+                    }
+                }
                 break;
 
             case RET:
                 gen1(c, _1.name, ops[0] ?? { type: "R", n: 0 });
                 break;
 
+            case ADD32:
+            case SUB32:
+            case MUL32:
+            case DIV32:
+            case SDIV32:
+            case MOD32:
+            case SMOD32:
             case ADD:
             case SUB:
+            case DIV:
+            case SDIV:
+            case MOD:
+            case SMOD:
             case MUL:
                 checkOprands(_1, 3);
                 gen3(c, _1.name, ops[0], ops[1], ops[2]);
-                break;
-            case DIV:
-                checkOprands(_1, 0);
-                c.div();
-                break;
-            case SDIV:
-                checkOprands(_1, 0);
-                c.sdiv();
-                break;
-            case MOD:
-                checkOprands(_1, 0);
-                c.divmod();
-                break;
-            case SMOD:
-                checkOprands(_1, 0);
-                c.sdivmod();
                 break;
 
             case EQ:
@@ -630,6 +792,9 @@ class Jitasm(lexer_) {
                 comp(c, _1.name, op0.name, ops[1], ops[2]);
                 break;
 
+            case NEG32:
+            case CLZ32:
+            case NOT32:
             case NEG:
             case CLZ:
             case NOT:
@@ -637,6 +802,20 @@ class Jitasm(lexer_) {
                 gen1(c, _1.name, ops[0]);
                 break;
 
+            case MOV8S:
+            case MOV16S:
+            case MOV32S:
+            case MOV8:
+            case MOV16:
+            case MOV32:
+            case FMOV32:
+            case FMOV:
+            case AND32:
+            case OR32:
+            case XOR32:
+            case SHL32:
+            case LSHR32:
+            case ASHR32:
             case MOV:
             case AND:
             case OR:
@@ -657,8 +836,23 @@ class Jitasm(lexer_) {
         return c.generate();
     }
 
+    public dump(list) {
+        if (!code_) {
+            code_ = jitCompile(list);
+        }
+        code_.dump();
+        return 0;
+    }
+
+    public run(list) {
+        if (!code_) {
+            code_ = jitCompile(list);
+        }
+        return code_.run();
+    }
+
     public parse(asmcode) {
-        labels_ = [];
+        entries_ = [];
         pendings_ = [];
         error_ = false;
 
@@ -678,12 +872,10 @@ class Jitasm(lexer_) {
         });
 
         var ret;
-        parser.parse(asmcode, { &(r)
+        parser.parse(asmcode.trimRight() + '\n', { &(r)
             ret = r;
         });
-        if (!error_) {
-            ret = compile(ret);
-        }
+
         if (!error_) {
             return ret;
         }

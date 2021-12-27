@@ -4,15 +4,18 @@
 using @kacc.Lexer;
 %}
 
+%token LOAD DATA STR
 %token CMD
-%token FUNC LABEL IF
+%token FUNC LIB LABEL IF
 %token JMP CALL RET
-%token MOV NEG CLZ
-%token ADD SUB MUL DIV SDIV MOD SMOD
-%token NOT AND OR XOR SHL LSHR ASHR
+%token FMOV32 FMOV
+%token MOV8S MOV16S MOV32S MOV8 MOV16 MOV32 MOV
+%token NOT32 NEG32 CLZ32 NOT NEG CLZ
+%token ADD32 SUB32 MUL32 DIV32 SDIV32 MOD32 SMOD32 AND32 OR32 XOR32 SHL32 LSHR32 ASHR32
+%token ADD SUB MUL DIV SDIV MOD SMOD AND OR XOR SHL LSHR ASHR
 %token EQ NEQ GE LE GT LT SGE SLE SGT SLT
 %token SREG RREG VAR ARG INT DBL
-%token SW FP SIGNED OPEQ OPNEQ OPGE OPLE
+%token SIGNED OPEQ OPNEQ OPGE OPLE
 
 %%
 
@@ -29,8 +32,21 @@ line
     | FUNC LABEL '\n' { $$ = { "cmd": FUNC, "name": "func", "operand": [{ "name": $2.value }] }; }
     | CMD operands_Opt '\n' { $$ = { "cmd": $1.value, "name": $1.name, "operand": $2 }; }
     | JMP LABEL '\n' { $$ = { "cmd": JMP, "name": "jmp", "operand": [{ "name": $2.value }] }; }
+    | LOAD FUNC LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": $3.value }] }; }
+    | LOAD LIB LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": $3.value }] }; }
+    | DATA '@' LABEL data { $$ = { "cmd": DATA, "name": "data", "operand": [{ "name": $3.value, "value": $4.value }] }; }
     | alternatives '\n'
     | error '\n' { $$.error = true; }
+    ;
+
+data
+    : STR
+    | '<' values '>' { $$.value = <...$2>; }
+    ;
+
+values
+    : INT { $$ = [$1.value]; }
+    | values ',' INT { $$.push($3.value); }
     ;
 
 operands_Opt
@@ -46,11 +62,19 @@ operands
 operand
     : SREG { $$ = { "type": "S", "n": $1.value }; }
     | RREG { $$ = { "type": "R", "n": $1.value }; }
+    | '[' SREG offset_Opt ']' { $$ = { "type": "DS", "n": $2.value, "offset": $3.value }; }
+    | '[' RREG offset_Opt ']' { $$ = { "type": "DR", "n": $2.value, "offset": $3.value }; }
     | INT { $$ = { "type": "I", "v": $1.value }; }
     | DBL { $$ = { "type": "D", "v": $1.value }; }
     | VAR '[' INT ']' { $$ = { "type": "V", "offset": $3.value }; }
     | ARG '[' INT ']' { $$ = { "type": "A", "offset": $3.value }; }
     | LABEL { $$ = { "type": "L", "name": $1.value }; }
+    | '@' LABEL { $$ = { "type": "A", "name": $2.value }; }
+    ;
+
+offset_Opt
+    : /* empty */ { $$.value = 0; }
+    | '+' INT { $$.value = $2.value; }
     ;
 
 alternatives
@@ -68,81 +92,11 @@ alternatives
 
 %%
 
-/* Lexical analyzer */
-Jitasm.lexer = new Kacc.Lexer();
-Jitasm.lexer.addSkip(/[ \t\r]+|#[^\r\n]+/);
-Jitasm.lexer.addKeyword("==", OPEQ);
-Jitasm.lexer.addKeyword("!=", OPNEQ);
-Jitasm.lexer.addKeyword(">=", OPGE);
-Jitasm.lexer.addKeyword("<=", OPLE);
-Jitasm.lexer.addKeyword("if", IF);
-Jitasm.lexer.addKeyword("signed", SIGNED);
-Jitasm.lexer.addKeyword("func", FUNC);
-Jitasm.lexer.addKeyword("goto", JMP) { &(yylval, token)
-    yylval.value = JMP;
-    yylval.name = "jmp";
-    return token;
-};
-[
-    { "value": JMP,  "name": "jmp"  },
-    { "value": CALL, "name": "call" },
-    { "value": RET,  "name": "ret"  },
-    { "value": MOV,  "name": "mov"  },
-    { "value": NEG,  "name": "neg"  },
-    { "value": CLZ,  "name": "clz"  },
-    { "value": ADD,  "name": "add"  },
-    { "value": SUB,  "name": "sub"  },
-    { "value": MUL,  "name": "mul"  },
-    { "value": DIV,  "name": "div"  },
-    { "value": SDIV, "name": "sdiv" },
-    { "value": MOD,  "name": "mod"  },
-    { "value": SMOD, "name": "smod" },
-    { "value": SHL,  "name": "shl"  },
-    { "value": LSHR, "name": "lshr" },
-    { "value": ASHR, "name": "ashr" },
-    { "value": EQ,   "name": "eq"   },
-    { "value": NEQ,  "name": "neq"  },
-    { "value": GE,   "name": "ge"   },
-    { "value": LE,   "name": "le"   },
-    { "value": GT,   "name": "gt"   },
-    { "value": LT,   "name": "lt"   },
-    { "value": SGE,  "name": "sge"  },
-    { "value": SLE,  "name": "sle"  },
-    { "value": SGT,  "name": "sgt"  },
-    { "value": SLT,  "name": "slt"  },
-].each {
-    var key = _1;
-    Jitasm.lexer.addKeyword(_1.name, CMD) { &(yylval, token)
-        yylval.value = key.value;
-        yylval.name = key.name;
-        return token;
-    };
-};
-
-Jitasm.lexer.addRule(/var/, VAR);
-Jitasm.lexer.addRule(/arg/, ARG);
-Jitasm.lexer.addRule(/\br([0-9]+)\b/, RREG) { &(value)
-    return Integer.parseInt(value.subString(1));
-};
-Jitasm.lexer.addRule(/\bs([0-9]+)\b/, SREG) { &(value)
-    return Integer.parseInt(value.subString(1));
-};
-Jitasm.lexer.addRule(/\b[_a-zA-Z][_a-zA-Z0-9]*\b/, LABEL);
-Jitasm.lexer.addRule(/[0-9]+(\.[0-9]+([eE][-+]?[0-9]+)?)?/) { &(yylval)
-    if (yylval.value.find(".") > 0 || yylval.value.find("e") > 0 || yylval.value.find("E") > 0) {
-        yylval.value = Double.parseDouble(yylval.value);
-        return DBL;
-    }
-    yylval.value = Integer.parseInt(yylval.value);
-    return INT;
-};
-// Jitasm.lexer.debugOn(Jitasm.lexer.DEBUG_TOKEN|Jitasm.lexer.DEBUG_VALUE);
-
 using Jit;
 
-class Jitasm(lexer_) {
-    lexer_ ??= Jitasm.lexer;
-    var labels_, pendings_, error_;
+class Jitasm(opts_) {
+    var lexer_, code_;
+    var loaded_, data_, entries_, funcname_, pendings_, error_;
     var regs_ = {
         "R": [Jit.R0, Jit.R1, Jit.R2, Jit.R3, Jit.R4, Jit.R5],
         "S": [Jit.S0, Jit.S1, Jit.S2, Jit.S3, Jit.S4, Jit.S5],
@@ -150,7 +104,137 @@ class Jitasm(lexer_) {
         "FS": [Jit.FS0, Jit.FS1, Jit.FS2, Jit.FS3, Jit.FS4, Jit.FS5],
     };
 
+    private initialize() {
+        /* Lexical analyzer */
+        lexer_ = new Kacc.Lexer();
+        lexer_.addSkip(/[ \t\r]+|#[^\r\n]+/);
+        lexer_.addKeyword("load", LOAD);
+        lexer_.addKeyword("data", DATA);
+        lexer_.addKeyword("==", OPEQ);
+        lexer_.addKeyword("!=", OPNEQ);
+        lexer_.addKeyword(">=", OPGE);
+        lexer_.addKeyword("<=", OPLE);
+        lexer_.addKeyword("if", IF);
+        lexer_.addKeyword("signed", SIGNED);
+        lexer_.addKeyword("func", FUNC);
+        lexer_.addKeyword("lib", LIB);
+        lexer_.addKeyword("var", VAR);
+        lexer_.addKeyword("arg", ARG);
+        lexer_.addKeyword("goto", JMP) { &(yylval, token)
+            yylval.value = JMP;
+            yylval.name = "jmp";
+            return token;
+        };
+        [
+            { "value": JMP,    "name": "jmp"       },
+            { "value": CALL,   "name": "call"      },
+            { "value": RET,    "name": "ret"       },
+
+            { "value": MOV8S,  "name": "mov8s"     },
+            { "value": MOV16S, "name": "mov16s"    },
+            { "value": MOV32S, "name": "mov32s"    },
+            { "value": MOV8,   "name": "mov8"      },
+            { "value": MOV16,  "name": "mov16"     },
+            { "value": MOV32,  "name": "mov32"     },
+            { "value": MOV,    "name": "mov"       },
+            { "value": FMOV32, "name": "fmov32"    },
+            { "value": FMOV,   "name": "fmov"      },
+
+            { "value": NOT32,  "name": "not32"     },
+            { "value": NEG32,  "name": "neg32"     },
+            { "value": CLZ32,  "name": "clz32"     },
+            { "value": NOT,    "name": "not"       },
+            { "value": NEG,    "name": "neg"       },
+            { "value": CLZ,    "name": "clz"       },
+
+            { "value": ADD32,  "name": "add32"     },
+            { "value": SUB32,  "name": "sub32"     },
+            { "value": MUL32,  "name": "mul32"     },
+            { "value": DIV32,  "name": "div32"     },
+            { "value": SDIV32, "name": "sdiv32"    },
+            { "value": MOD32,  "name": "divmod32"  },
+            { "value": SMOD32, "name": "sdivmod32" },
+            { "value": SHL32,  "name": "shl32"     },
+            { "value": LSHR32, "name": "lshr32"    },
+            { "value": ASHR32, "name": "ashr32"    },
+            { "value": ADD,    "name": "add"       },
+            { "value": SUB,    "name": "sub"       },
+            { "value": MUL,    "name": "mul"       },
+            { "value": DIV,    "name": "div"       },
+            { "value": SDIV,   "name": "sdiv"      },
+            { "value": MOD,    "name": "divmod"    },
+            { "value": SMOD,   "name": "sdivmod"   },
+            { "value": SHL,    "name": "shl"       },
+            { "value": LSHR,   "name": "lshr"      },
+            { "value": ASHR,   "name": "ashr"      },
+
+            { "value": EQ,     "name": "eq"        },
+            { "value": NEQ,    "name": "neq"       },
+            { "value": GE,     "name": "ge"        },
+            { "value": LE,     "name": "le"        },
+            { "value": GT,     "name": "gt"        },
+            { "value": LT,     "name": "lt"        },
+            { "value": SGE,    "name": "sge"       },
+            { "value": SLE,    "name": "sle"       },
+            { "value": SGT,    "name": "sgt"       },
+            { "value": SLT,    "name": "slt"       },
+        ].each {
+            var key = _1;
+            lexer_.addKeyword(_1.name, CMD) { &(yylval, token)
+                yylval.value = key.value;
+                yylval.name = key.name;
+                return token;
+            };
+        };
+
+        lexer_.addRule(/\br([0-9]+)\b/, RREG) { &(value)
+            return Integer.parseInt(value.subString(1));
+        };
+        lexer_.addRule(/\bs([0-9]+)\b/, SREG) { &(value)
+            return Integer.parseInt(value.subString(1));
+        };
+        lexer_.addRule(/"([^\"]|\\.)*"/, STR) { &(value)
+            return value.subString(1, value.length() - 2).replace(/\\(.)/, &(g) => {
+                var c = g[1].string;
+                if (c == 'n') {
+                    return '\n';
+                }
+                if (c == 'r') {
+                    return '\r';
+                }
+                if (c == 't') {
+                    return '\t';
+                }
+                return c;
+            });
+        };
+        lexer_.addRule(/\b[_a-zA-Z][_a-zA-Z0-9]*\b/, LABEL);
+        lexer_.addRule(/0b[0-9a-fA-F]+|0x[0-9a-fA-F]+|0[0-7]*/, INT) { &(value)
+            return Integer.parseInt(value);
+        };
+        lexer_.addRule(/[1-9][0-9]*(\.[0-9]+([eE][-+]?[0-9]+)?)?/) { &(yylval)
+            if (yylval.value.find(".") > 0 || yylval.value.find("e") > 0 || yylval.value.find("E") > 0) {
+                yylval.value = Double.parseDouble(yylval.value);
+                return DBL;
+            }
+            yylval.value = Integer.parseInt(yylval.value);
+            return INT;
+        };
+        if (opts_.debug.lexer) {
+            lexer_.debugOn(lexer_.DEBUG_TOKEN|lexer_.DEBUG_VALUE);
+        }
+    }
+
     private get(val) {
+        if (val.type == "A") {
+            if (data_[val.name].isUndefined) {
+                throw RuntimeException("Undefined data: " + val.name);
+            }
+            return data_[val.name];
+        }
+        if (val.type == "I" || val.type == "D") {
+            return Jit.IMM(val.v);
+        }
         if (val.type == "R" || val.type == "S") {
             var r = regs_[val.type][val.n];
             if (r.isUndefined) {
@@ -158,41 +242,31 @@ class Jitasm(lexer_) {
             }
             return r;
         }
-        if (val.type == "I") {
-            return Jit.IMM(val.v);
+        if (val.type == "DR" || val.type == "DS") {
+            var r = regs_[val.type == "DR" ? "R" : "S"][val.n];
+            if (r.isUndefined) {
+                throw RuntimeException("Invalid register");
+            }
+            return Jit.MEM1(r, val.offset);
         }
         throw RuntimeException("Invalid operand");
     }
 
     private comp(c, cmd, label, op1, op2) {
         var target = c[cmd](get(op1), get(op2));
-        if (labels_[label].label) {
-            target.setLabel(labels_[label].label);
+        var jumpto = entries_[funcname_].labels[label];
+        if (jumpto) {
+            target.setLabel(jumpto);
         } else {
-            pendings_.push((&(name, target) => {
+            pendings_.push((&(funcname, label, target) => {
                 return function() {
-                    if (labels_[name].label.isUndefined) {
-                        throw RuntimeException("Function not found: " + name);
+                    var jumpto = entries_[funcname].labels[label];
+                    if (jumpto.isUndefined) {
+                        throw RuntimeException("Label not found: " + label + " in " + funcname);
                     }
-                    target.setLabel(labels_[name].label);
+                    target.setLabel(jumpto);
                 };
-            })(label, target));
-        }
-    }
-
-    private calljmp(c, cmd, label, prop, msg) {
-        if (labels_[label][prop]) {
-            c[cmd](labels_[label][prop]);
-        } else {
-            var target = c[cmd]();
-            pendings_.push((&(name, target) => {
-                return function() {
-                    if (labels_[name][prop].isUndefined) {
-                        throw RuntimeException(msg);
-                    }
-                    target.setLabel(labels_[name][prop]);
-                };
-            })(label, target));
+            })(funcname_, label, target));
         }
     }
 
@@ -220,7 +294,7 @@ class Jitasm(lexer_) {
         }
     }
 
-    private compile(list) {
+    private jitCompile(list) {
         // list.each { System.println(_1.toJsonString()); };
         // return;
 
@@ -229,52 +303,100 @@ class Jitasm(lexer_) {
             var ops = _1.operand;
             var op0 = ops[0];
             switch (_1.cmd) {
+            case LOAD:
+                if (op0.type == LIB) {
+                    Jit.Clib.addlib(op0.name);
+                } else if (op0.type == FUNC) {
+                    loaded_[op0.name] = Jit.Clib.load(op0.name);
+                    if (!loaded_[op0.name]) {
+                        throw RuntimeException("Loading a function failed: " + op0.name);
+                    }
+                } else {
+                    throw RuntimeException("Invalid load type");
+                }
+                break;
+            case DATA:
+                if (op0.value.isString || op0.value.isBinary) {
+                    data_[op0.name] = op0.value;
+                } else {
+                    throw RuntimeException("Invalid data type");
+                }
+                break;
+
             case FUNC:
-                if (labels_[op0.name].entry.isDefined) {
+                funcname_ = op0.name;
+                if (entries_[funcname_].entry.isDefined) {
                     throw RuntimeException("Duplicated function name");
                 }
-                labels_[op0.name].entry = c.enter();
+                entries_[funcname_].entry = c.enter();
+                entries_[funcname_].labels = {};
                 break;
             case LABEL:
-                if (labels_[op0.name].label.isUndefined) {
-                    labels_[op0.name].label = c.label();
+                if (entries_[funcname_].labels[op0.name].isUndefined) {
+                    entries_[funcname_].labels[op0.name] = c.label();
                 }
                 break;
 
             case JMP:
                 checkOprands(_1, 1);
-                calljmp(c, _1.name, op0.name, "label", "Label not found: " + op0.name);
+                var jumpto = entries_[funcname_].labels[op0.name];
+                if (jumpto) {
+                    c.jump(jumpto);
+                } else {
+                    var target = c.jmp();
+                    pendings_.push((&(funcname, label, target) => {
+                        return function() {
+                            var jumpto = entries_[funcname].labels[label];
+                            if (jumpto.isUndefined) {
+                                throw RuntimeException("Label not found: " + label + " in " + funcname);
+                            }
+                            target.setLabel(jumpto);
+                        };
+                    })(funcname_, op0.name, target));
+                }
                 break;
             case CALL:
                 checkOprands(_1, 1);
-                calljmp(c, _1.name, op0.name, "entry", "Function not found: " + op0.name);
+                if (loaded_[op0.name]) {
+                    c.icall(loaded_[op0.name]);
+                } else {
+                    var entry = entries_[op0.name].entry;
+                    if (entry) {
+                        c.call(entry);
+                    } else {
+                        var target = c.call();
+                        pendings_.push((&(name, target) => {
+                            return function() {
+                                if (entries_[name].entry.isUndefined) {
+                                    throw RuntimeException("Function not found: " + name);
+                                }
+                                target.setLabel(entries_[name].entry);
+                            };
+                        })(op0.name, target));
+                    }
+                }
                 break;
 
             case RET:
                 gen1(c, _1.name, ops[0] ?? { type: "R", n: 0 });
                 break;
 
+            case ADD32:
+            case SUB32:
+            case MUL32:
+            case DIV32:
+            case SDIV32:
+            case MOD32:
+            case SMOD32:
             case ADD:
             case SUB:
+            case DIV:
+            case SDIV:
+            case MOD:
+            case SMOD:
             case MUL:
                 checkOprands(_1, 3);
                 gen3(c, _1.name, ops[0], ops[1], ops[2]);
-                break;
-            case DIV:
-                checkOprands(_1, 0);
-                c.div();
-                break;
-            case SDIV:
-                checkOprands(_1, 0);
-                c.sdiv();
-                break;
-            case MOD:
-                checkOprands(_1, 0);
-                c.divmod();
-                break;
-            case SMOD:
-                checkOprands(_1, 0);
-                c.sdivmod();
                 break;
 
             case EQ:
@@ -291,6 +413,9 @@ class Jitasm(lexer_) {
                 comp(c, _1.name, op0.name, ops[1], ops[2]);
                 break;
 
+            case NEG32:
+            case CLZ32:
+            case NOT32:
             case NEG:
             case CLZ:
             case NOT:
@@ -298,6 +423,20 @@ class Jitasm(lexer_) {
                 gen1(c, _1.name, ops[0]);
                 break;
 
+            case MOV8S:
+            case MOV16S:
+            case MOV32S:
+            case MOV8:
+            case MOV16:
+            case MOV32:
+            case FMOV32:
+            case FMOV:
+            case AND32:
+            case OR32:
+            case XOR32:
+            case SHL32:
+            case LSHR32:
+            case ASHR32:
             case MOV:
             case AND:
             case OR:
@@ -318,8 +457,23 @@ class Jitasm(lexer_) {
         return c.generate();
     }
 
+    public dump(list) {
+        if (!code_) {
+            code_ = jitCompile(list);
+        }
+        code_.dump();
+        return 0;
+    }
+
+    public run(list) {
+        if (!code_) {
+            code_ = jitCompile(list);
+        }
+        return code_.run();
+    }
+
     public parse(asmcode) {
-        labels_ = [];
+        entries_ = [];
         pendings_ = [];
         error_ = false;
 
@@ -339,12 +493,10 @@ class Jitasm(lexer_) {
         });
 
         var ret;
-        parser.parse(asmcode, { &(r)
+        parser.parse(asmcode.trimRight() + '\n', { &(r)
             ret = r;
         });
-        if (!error_) {
-            ret = compile(ret);
-        }
+
         if (!error_) {
             return ret;
         }

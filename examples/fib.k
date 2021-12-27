@@ -1,13 +1,12 @@
-
 func main
     mov r0, 42
     call fib
     ret
 
 func fib
-    if signed s0 >= 3 goto label1
+    if signed s0 >= 3 goto calcfib
     ret s0
-label1:
+  calcfib:
     sub r0, s0, 2
     call fib
     mov s1, r0
