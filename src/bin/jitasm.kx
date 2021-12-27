@@ -2,7 +2,7 @@
 using @jitasm.Jitasm;
 
 function usage() {
-    $stderr.println("Usage: kxjitasm [-h] asm.k");
+    $stderr.println("Usage: kxjitasm [-hdrxm] asm.k");
     $stderr.println("    -h          Display this help.");
     $stderr.println("    -d          Dump actual assemble list.");
     $stderr.println("    -r          Run with JIT.");
@@ -12,7 +12,7 @@ function usage() {
 }
 
 const isWindows = System.PLATFORM.endsWith("-WIN");
-var file, opt, opts;
+var file, opt, opts, progargs = [];
 var args = $$;
 args.shift();
 while (opt = System.getopt(args, "hdrx", { debug: '=' })) {
@@ -36,10 +36,14 @@ while (opt = System.getopt(args, "hdrx", { debug: '=' })) {
         opts.debug[opt.arg] = true;
         break;
     case '-': {
-        file = isWindows ? opt.arg.replace("\\", "/") : opt.arg;
-        if (!File.exists(file)) {
-            $stderr.println("File not found: " + file);
-            return 1;
+        if (file.isUndefined) {
+            file = isWindows ? opt.arg.replace("\\", "/") : opt.arg;
+            if (!File.exists(file)) {
+                $stderr.println("File not found: " + file);
+                return 1;
+            }
+        } else {
+            progargs.push(opt.arg);
         }
         break;
     }
@@ -53,7 +57,7 @@ if (!file) {
 }
 
 var jitasm = new Jitasm(opts);
-var list = jitasm.parse(File.load(file));
+var list = jitasm.parse(File.load(file), progargs);
 if (!list) {
     return 1;
 }

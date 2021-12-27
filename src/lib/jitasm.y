@@ -4,17 +4,17 @@
 using @kacc.Lexer;
 %}
 
-%token LOAD STR
+%token LOAD DATA STR
 %token CMD
 %token FUNC LIB LABEL IF
 %token JMP CALL RET
-%token FMOV32 FMOV
+%token LOCALBASE FMOV32 FMOV
 %token MOV8S MOV16S MOV32S MOV8 MOV16 MOV32 MOV
 %token NOT32 NEG32 CLZ32 NOT NEG CLZ
 %token ADD32 SUB32 MUL32 DIV32 SDIV32 MOD32 SMOD32 AND32 OR32 XOR32 SHL32 LSHR32 ASHR32
 %token ADD SUB MUL DIV SDIV MOD SMOD AND OR XOR SHL LSHR ASHR
 %token EQ NEQ GE LE GT LT SGE SLE SGT SLT
-%token SREG RREG VAR ARG INT DBL
+%token SREG RREG VAR INT DBL
 %token SIGNED OPEQ OPNEQ OPGE OPLE
 
 %%
@@ -31,6 +31,7 @@ line
     | LABEL ':' '\n' { $$ = { "cmd": LABEL, "name": "label", "operand": [{ "name": $1.value }] }; }
     | FUNC LABEL '\n' { $$ = { "cmd": FUNC, "name": "func", "operand": [{ "name": $2.value }] }; }
     | CMD operands_Opt '\n' { $$ = { "cmd": $1.value, "name": $1.name, "operand": $2 }; }
+    | LOCALBASE operands '\n' { $$ = { "cmd": LOCALBASE, "name": "localbase", "operand": $2 }; }
     | JMP LABEL '\n' { $$ = { "cmd": JMP, "name": "jmp", "operand": [{ "name": $2.value }] }; }
     | LOAD FUNC LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": $3.value }] }; }
     | LOAD LIB LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": $3.value }] }; }
@@ -67,9 +68,8 @@ operand
     | INT { $$ = { "type": "I", "v": $1.value }; }
     | DBL { $$ = { "type": "D", "v": $1.value }; }
     | VAR '[' INT ']' { $$ = { "type": "V", "offset": $3.value }; }
-    | ARG '[' INT ']' { $$ = { "type": "A", "offset": $3.value }; }
     | LABEL { $$ = { "type": "L", "name": $1.value }; }
-    | '@' LABEL { $$ = { "type": "A", "name": $2.value }; }
+    | '@' LABEL { $$ = { "type": "@", "name": $2.value }; }
     ;
 
 offset_Opt
@@ -95,7 +95,7 @@ alternatives
 using Jit;
 
 class Jitasm(opts_) {
-    var lexer_, code_;
+    var lexer_, code_, main_;
     var loaded_, data_, entries_, funcname_, pendings_, error_;
     var regs_ = {
         "R": [Jit.R0, Jit.R1, Jit.R2, Jit.R3, Jit.R4, Jit.R5],
@@ -118,7 +118,7 @@ class Jitasm(opts_) {
         lexer_.addKeyword("func", FUNC);
         lexer_.addKeyword("lib", LIB);
         lexer_.addKeyword("var", VAR);
-        lexer_.addKeyword("arg", ARG);
+        lexer_.addKeyword("localbase", LOCALBASE);
         lexer_.addKeyword("goto", JMP) { &(yylval, token)
             yylval.value = JMP;
             yylval.name = "jmp";
@@ -193,11 +193,12 @@ class Jitasm(opts_) {
             return Integer.parseInt(value.subString(1));
         };
         var escape = {
+            '"': '"',
             'n': '\n',
             't': '\t',
             'r': '\r',
         };
-        lexer_.addRule(/"([^\"]|\\.)*"/, STR) { &(value)
+        lexer_.addRule(/"(\\.|[^\"])*"/, STR) { &(value)
             return value.subString(1, value.length() - 2).replace(/\\(.)/, &(g) => {
                 var c = g[1].string;
                 if (escape[c]) {
@@ -224,14 +225,14 @@ class Jitasm(opts_) {
     }
 
     private get(val) {
-        if (val.type == "A") {
+        if (val.type == "@") {
             if (data_[val.name].isUndefined) {
                 throw RuntimeException("Undefined data: " + val.name);
             }
             return data_[val.name];
         }
         if (val.type == "I" || val.type == "D") {
-            return Jit.IMM(val.v);
+            return val.v;
         }
         if (val.type == "R" || val.type == "S") {
             var r = regs_[val.type][val.n];
@@ -246,6 +247,9 @@ class Jitasm(opts_) {
                 throw RuntimeException("Invalid register");
             }
             return Jit.MEM1(r, val.offset);
+        }
+        if (val.type == "V") {
+            return Jit.VAR(val.offset);
         }
         throw RuntimeException("Invalid operand");
     }
@@ -321,6 +325,10 @@ class Jitasm(opts_) {
                 }
                 break;
 
+            case LOCALBASE:
+                c.localp(get(op0), ops.length() > 1 ? get(ops[1]) : 0);
+                break;
+
             case FUNC:
                 funcname_ = op0.name;
                 if (entries_[funcname_].entry.isDefined) {
@@ -328,6 +336,9 @@ class Jitasm(opts_) {
                 }
                 entries_[funcname_].entry = c.enter();
                 entries_[funcname_].labels = {};
+                if (funcname_ == "main") {
+                    main_ = true;
+                }
                 break;
             case LABEL:
                 if (entries_[funcname_].labels[op0.name].isUndefined) {
@@ -451,6 +462,10 @@ class Jitasm(opts_) {
             }
         };
 
+        if (!main_) {
+            throw RuntimeException("The function entry point of 'main' is not found");
+        }
+
         pendings_.each { => _1() };
         return c.generate();
     }
@@ -470,9 +485,10 @@ class Jitasm(opts_) {
         return code_.run();
     }
 
-    public parse(asmcode) {
+    public parse(asmcode, args) {
         entries_ = [];
         pendings_ = [];
+        main_ = false;
         error_ = false;
 
         /* Parser */
@@ -490,8 +506,36 @@ class Jitasm(opts_) {
             },
         });
 
+        var startup = "";
+        var setupargs = ["mov r0, 0\n", "mov r1, 0\n", "mov r2, 0\n"];
+        args.each {
+            var str = _1.replace(/\\.|"/, &(g) => {
+                if (g[0].string == "\"") {
+                    return "\\\"";
+                }
+                return g[0].string;
+            });
+            startup += "@_start%{_2} \"%{str}\"\n";
+            switch (_2) {
+            case 0:
+                setupargs[0] = "mov r0, @_start%{_2}\n";
+                break;
+            case 1:
+                setupargs[1] = "mov r1, @_start%{_2}\n";
+                break;
+            case 2:
+                setupargs[2] = "localbase r2\n";
+                setupargs.push("mov var[%{_2 - 2}], @_start%{_2}\n");
+                break;
+            default:
+                setupargs.push("mov var[%{_2 - 2}], @_start%{_2}\n");
+                break;
+            }
+        };
+
+        startup += "\nfunc _start\n" + setupargs.join('') + "call main\nret\n";
         var ret;
-        parser.parse(asmcode.trimRight() + '\n', { &(r)
+        parser.parse(startup + asmcode.trimRight() + '\n', { &(r)
             ret = r;
         });
 

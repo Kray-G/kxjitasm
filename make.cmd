@@ -1,11 +1,10 @@
 @echo off
 setlocal
 
-set ARGS=-v src\lib\jitasm.y -o src\lib\Jitasm.kx
 if "%1" == "dev" (
-    kacc %ARGS%
+    kacc -v src\lib\jitasm.y -o src\lib\Jitasm.kx
     kip devinst
 )
-kacc -l %ARGS%
+kacc -l -v src\lib\jitasm.y -o src\lib\Jitasm.kx
 
 endlocal

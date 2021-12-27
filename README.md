@@ -2,7 +2,7 @@
 
 ## Background
 
-As long as I see the JIT world, most of JIT assembler is not portable. It means a JIT assember is suited only to a specific platform like x86, x64, arm, or something like that. Therefore, if you use a JIT assember for x64, you can not use it for the other platform. When you want to use it for the arm platform, you have to make it another way and it is very tough activity.
+As far as I can see the JIT world, most of JIT assembler is not portable. It means a JIT assember is suited only to a specific platform like x86, x64, arm, or something like that. Therefore, a JIT assembler for x64 that you are using can not be used for the other platform. When you want to use it for the arm platform, you have to make it another way and it is very tough activity.
 
 This JIT assembler's purpose is to make it portable. By abstracted assembly language, it makes that you can write it once and use it anywhere. Of course, it has a limitation to suit to various platforms, but by that it will make it more reasonable.
 
@@ -123,6 +123,7 @@ The following table shows the list of mnemonic in this JIT assembler.
 
 | Instruction |    Operands     |                        Meaning                        |                   Remark                   |
 | ----------- | --------------- | ----------------------------------------------------- | ------------------------------------------ |
+| `localbase` | REG (, index)   | Store the address of a local variable to REG.         | Omitting an index means zero.              |
 | `jmp`       | LABEL           | Jump to the label.                                    | `goto` is also available instead of `jmp`. |
 | `call`      | ENTRY           | Call a function.                                      |                                            |
 | `ret`       | (VAL/REG)       | Return VAL from a function.                           | if VAL/REG is omitted, returns `r0`.       |
