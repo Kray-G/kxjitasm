@@ -100,11 +100,11 @@ func entryname
 
 You can use the following instructions independent of a function scope.
 
-|  Instruction  | Operands |               Meaning               |                     Remark                     |
-| ------------- | -------- | ----------------------------------- | ---------------------------------------------- |
-| `load` `func` | NAME     | Load a function as a C function.    | The search library is CRT by default.          |
-| `load` `lib`  | NAME     | Load and add a dynamic link libray. | This library is added to the search library.   |
-| `data`        | DATA     | Constant data store.                | As DATA, it is supported a string or a binary. |
+|  Instruction  | Operands |               Meaning                |                     Remark                     |
+| ------------- | -------- | ------------------------------------ | ---------------------------------------------- |
+| `load` `func` | NAME     | Load a function as a C function.     | The search library is CRT by default.          |
+| `load` `lib`  | NAME     | Load and add a dynamic link library. | This library is added to the search library.   |
+| `data`        | DATA     | Constant data store.                 | As DATA, it is supported a string or a binary. |
 
 A string should be `"..."` style, and a binary should be `<...>` style.
 
