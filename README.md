@@ -58,7 +58,7 @@ func fib
 
 #### Call C Runtime
 
-Although it has a limitation, you can use C Runtime functions. The limitation is to be able to use only 3 arguments of unsigned intergers. For example, you can use `printf` if it is 3 arguments as below. By the way, this code is assumed to be used with the above fib code.
+Although it has a limitation, you can use C Runtime functions. The limitation is to be able to use only 3 arguments of unsigned integers. For example, you can use `printf` if it is 3 arguments as below. By the way, this code is assumed to be used with the above fib code.
 
 ```asm
 load func printf
