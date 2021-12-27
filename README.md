@@ -1,14 +1,14 @@
-# Jit Assember
+# Jit Assembler
 
 ## Background
 
-As far as I can see the JIT world, most of JIT assembler is not portable. It means a JIT assember is suited only to a specific platform like x86, x64, arm, or something like that. Therefore, a JIT assembler for x64 that you are using can not be used for the other platform. When you want to use it for the arm platform, you have to make it another way and it is very tough activity.
+As far as I can see the JIT world, most of JIT assembler is not portable. It means a JIT assembler is suited only to a specific platform like x86, x64, arm, or something like that. Therefore, a JIT assembler for x64 that you are using can not be used for the other platform. When you want to use it for the arm platform, you have to make it another way and it is very tough activity.
 
 This JIT assembler's purpose is to make it portable. By abstracted assembly language, it makes that you can write it once and use it anywhere. Of course, it has a limitation to suit to various platforms, but by that it will make it more reasonable.
 
 ## Installation
 
-Use `kip` to install this Jit Assember because this is provided as a package of `Kinx`. Install this by the following command.
+Use `kip` to install this Jit Assembler because this is provided as a package of `Kinx`. Install this by the following command.
 
 ```
 $ kip install jitasm
