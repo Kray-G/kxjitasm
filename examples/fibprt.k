@@ -1,5 +1,7 @@
 load func printf
-@fmt "fib(%lld) = %lld\n"
+
+# Constant Data Store
+    @fmt "fib(%lld) = %lld\n"
 
 func main
     mov s0, 1

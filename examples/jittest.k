@@ -1,6 +1,8 @@
 load lib kxjit
 load func jit_test
-@msg "This is a JIT message, successful!\n"
+
+# Constant Data Store
+    @msg "This is a JIT message, successful!\n"
 
 func main
     mov r0, 0

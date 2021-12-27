@@ -4,78 +4,77 @@ using @kacc.Lexer;
 
 const YYERRTOK = 256;
 const LOAD = 257;
-const DATA = 258;
-const STR = 259;
-const CMD = 260;
-const FUNC = 261;
-const LIB = 262;
-const LABEL = 263;
-const IF = 264;
-const JMP = 265;
-const CALL = 266;
-const RET = 267;
-const FMOV32 = 268;
-const FMOV = 269;
-const MOV8S = 270;
-const MOV16S = 271;
-const MOV32S = 272;
-const MOV8 = 273;
-const MOV16 = 274;
-const MOV32 = 275;
-const MOV = 276;
-const NOT32 = 277;
-const NEG32 = 278;
-const CLZ32 = 279;
-const NOT = 280;
-const NEG = 281;
-const CLZ = 282;
-const ADD32 = 283;
-const SUB32 = 284;
-const MUL32 = 285;
-const DIV32 = 286;
-const SDIV32 = 287;
-const MOD32 = 288;
-const SMOD32 = 289;
-const AND32 = 290;
-const OR32 = 291;
-const XOR32 = 292;
-const SHL32 = 293;
-const LSHR32 = 294;
-const ASHR32 = 295;
-const ADD = 296;
-const SUB = 297;
-const MUL = 298;
-const DIV = 299;
-const SDIV = 300;
-const MOD = 301;
-const SMOD = 302;
-const AND = 303;
-const OR = 304;
-const XOR = 305;
-const SHL = 306;
-const LSHR = 307;
-const ASHR = 308;
-const EQ = 309;
-const NEQ = 310;
-const GE = 311;
-const LE = 312;
-const GT = 313;
-const LT = 314;
-const SGE = 315;
-const SLE = 316;
-const SGT = 317;
-const SLT = 318;
-const SREG = 319;
-const RREG = 320;
-const VAR = 321;
-const ARG = 322;
-const INT = 323;
-const DBL = 324;
-const SIGNED = 325;
-const OPEQ = 326;
-const OPNEQ = 327;
-const OPGE = 328;
-const OPLE = 329;
+const STR = 258;
+const CMD = 259;
+const FUNC = 260;
+const LIB = 261;
+const LABEL = 262;
+const IF = 263;
+const JMP = 264;
+const CALL = 265;
+const RET = 266;
+const FMOV32 = 267;
+const FMOV = 268;
+const MOV8S = 269;
+const MOV16S = 270;
+const MOV32S = 271;
+const MOV8 = 272;
+const MOV16 = 273;
+const MOV32 = 274;
+const MOV = 275;
+const NOT32 = 276;
+const NEG32 = 277;
+const CLZ32 = 278;
+const NOT = 279;
+const NEG = 280;
+const CLZ = 281;
+const ADD32 = 282;
+const SUB32 = 283;
+const MUL32 = 284;
+const DIV32 = 285;
+const SDIV32 = 286;
+const MOD32 = 287;
+const SMOD32 = 288;
+const AND32 = 289;
+const OR32 = 290;
+const XOR32 = 291;
+const SHL32 = 292;
+const LSHR32 = 293;
+const ASHR32 = 294;
+const ADD = 295;
+const SUB = 296;
+const MUL = 297;
+const DIV = 298;
+const SDIV = 299;
+const MOD = 300;
+const SMOD = 301;
+const AND = 302;
+const OR = 303;
+const XOR = 304;
+const SHL = 305;
+const LSHR = 306;
+const ASHR = 307;
+const EQ = 308;
+const NEQ = 309;
+const GE = 310;
+const LE = 311;
+const GT = 312;
+const LT = 313;
+const SGE = 314;
+const SLE = 315;
+const SGT = 316;
+const SLT = 317;
+const SREG = 318;
+const RREG = 319;
+const VAR = 320;
+const ARG = 321;
+const INT = 322;
+const DBL = 323;
+const SIGNED = 324;
+const OPEQ = 325;
+const OPNEQ = 326;
+const OPGE = 327;
+const OPLE = 328;
 
 namespace Kacc {
 
@@ -138,18 +137,18 @@ class Parser(lexer_, opts_) {
            30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
            30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
            30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
-           30,   30,   30,   30,   30,   30,    1,    2,   30,    3,
-            4,    5,    6,    7,    8,    9,   30,   30,   30,   30,
+           30,   30,   30,   30,   30,   30,    1,    2,    3,    4,
+            5,    6,    7,    8,    9,   30,   30,   30,   30,   30,
            30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
            30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
            30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
            30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
-           30,   30,   30,   30,   30,   30,   30,   30,   30,   10,
-           11,   12,   13,   14,   15,   16,   17,   18,   19,   20
+           30,   30,   30,   30,   30,   30,   30,   30,   10,   11,
+           12,   13,   14,   15,   16,   17,   18,   19,   20
     ];
 
     const YYBADCH = 30;
-    const YYMAXLEX = 330;
+    const YYMAXLEX = 329;
     const YYTERMS = 30;
     const YYNONTERMS = 11;
 
@@ -570,17 +569,16 @@ class Jitasm(opts_) {
         lexer_.addRule(/\bs([0-9]+)\b/, SREG) { &(value)
             return Integer.parseInt(value.subString(1));
         };
+        var escape = {
+            'n': '\n',
+            't': '\t',
+            'r': '\r',
+        };
         lexer_.addRule(/"([^\"]|\\.)*"/, STR) { &(value)
             return value.subString(1, value.length() - 2).replace(/\\(.)/, &(g) => {
                 var c = g[1].string;
-                if (c == 'n') {
-                    return '\n';
-                }
-                if (c == 'r') {
-                    return '\r';
-                }
-                if (c == 't') {
-                    return '\t';
+                if (escape[c]) {
+                    return escape[c];
                 }
                 return c;
             });

@@ -4,7 +4,7 @@
 using @kacc.Lexer;
 %}
 
-%token LOAD DATA STR
+%token LOAD STR
 %token CMD
 %token FUNC LIB LABEL IF
 %token JMP CALL RET
@@ -192,17 +192,16 @@ class Jitasm(opts_) {
         lexer_.addRule(/\bs([0-9]+)\b/, SREG) { &(value)
             return Integer.parseInt(value.subString(1));
         };
+        var escape = {
+            'n': '\n',
+            't': '\t',
+            'r': '\r',
+        };
         lexer_.addRule(/"([^\"]|\\.)*"/, STR) { &(value)
             return value.subString(1, value.length() - 2).replace(/\\(.)/, &(g) => {
                 var c = g[1].string;
-                if (c == 'n') {
-                    return '\n';
-                }
-                if (c == 'r') {
-                    return '\r';
-                }
-                if (c == 't') {
-                    return '\t';
+                if (escape[c]) {
+                    return escape[c];
                 }
                 return c;
             });
