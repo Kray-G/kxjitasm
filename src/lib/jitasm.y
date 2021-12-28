@@ -4,7 +4,7 @@
 using @kacc.Lexer;
 %}
 
-%token LOAD DATA STR
+%token LOAD DATA LINE STR
 %token CMD
 %token FUNC LIB LABEL IF
 %token JMP CALL RET
@@ -28,14 +28,15 @@ lines
 
 line
     : '\n' /* empty line */ { $$ = null; }
+    | '@' LINE INT '\n' { @setLine($3.value); }
     | LABEL ':' '\n' { $$ = { "cmd": LABEL, "name": "label", "operand": [{ "name": $1.value }] }; }
     | FUNC LABEL '\n' { $$ = { "cmd": FUNC, "name": "func", "operand": [{ "name": $2.value }] }; }
     | CMD operands_Opt '\n' { $$ = { "cmd": $1.value, "name": $1.name, "operand": $2 }; }
     | LOCALBASE operands '\n' { $$ = { "cmd": LOCALBASE, "name": "localbase", "operand": $2 }; }
     | JMP LABEL '\n' { $$ = { "cmd": JMP, "name": "jmp", "operand": [{ "name": $2.value }] }; }
-    | LOAD FUNC LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": $3.value }] }; }
-    | LOAD LIB LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": $3.value }] }; }
-    | '@' LABEL data { $$ = { "cmd": DATA, "name": "data", "operand": [{ "name": $2.value, "value": $3.value }] }; }
+    | LOAD FUNC LABEL '\n' { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": $3.value }] }; }
+    | LOAD LIB LABEL '\n' { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": $3.value }] }; }
+    | '@' LABEL data '\n' { $$ = { "cmd": DATA, "name": "data", "operand": [{ "name": $2.value, "value": $3.value }] }; }
     | alternatives '\n'
     | error '\n' { $$.error = true; }
     ;
@@ -75,6 +76,7 @@ operand
 offset_Opt
     : /* empty */ { $$.value = 0; }
     | '+' INT { $$.value = $2.value; }
+    | '-' INT { $$.value = -$2.value; }
     ;
 
 alternatives
@@ -107,7 +109,8 @@ class Jitasm(opts_) {
     private initialize() {
         /* Lexical analyzer */
         lexer_ = new Kacc.Lexer();
-        lexer_.addSkip(/[ \t\r]+|#[^\r\n]+/);
+        lexer_.addSkip(/[ \t\r]+|#[^\n]+/);
+        lexer_.addKeyword("line", LINE);
         lexer_.addKeyword("load", LOAD);
         lexer_.addKeyword("==", OPEQ);
         lexer_.addKeyword("!=", OPNEQ);
@@ -495,7 +498,6 @@ class Jitasm(opts_) {
         var lineNumber = 1;
         var parser = new Kacc.Parser(lexer_, {
             yyerror: &(msg) => {
-                System.println(("ERROR! " + msg + " at line %{lineNumber}").red().bold());
                 error_ = true;
             },
             nextLine: &() => {
@@ -504,10 +506,18 @@ class Jitasm(opts_) {
             getLine: &() => {
                 return lineNumber;
             },
+            setLine: &(line) => {
+                lineNumber = line - 1;
+            },
         });
 
+        var argcount = args.length();
         var startup = "";
-        var setupargs = ["mov r0, 0\n", "mov r1, 0\n", "mov r2, 0\n"];
+        var setupargs = [
+            "mov r0, %{argcount}\n",
+            argcount == 0 ? "mov r1, 0\n" : "localbase r1\n",
+            "mov r2, 0\n"
+        ];
         args.each {
             var str = _1.replace(/\\.|"/, &(g) => {
                 if (g[0].string == "\"") {
@@ -516,24 +526,10 @@ class Jitasm(opts_) {
                 return g[0].string;
             });
             startup += "@_start%{_2} \"%{str}\"\n";
-            switch (_2) {
-            case 0:
-                setupargs[0] = "mov r0, @_start%{_2}\n";
-                break;
-            case 1:
-                setupargs[1] = "mov r1, @_start%{_2}\n";
-                break;
-            case 2:
-                setupargs[2] = "localbase r2\n";
-                setupargs.push("mov var[%{_2 - 2}], @_start%{_2}\n");
-                break;
-            default:
-                setupargs.push("mov var[%{_2 - 2}], @_start%{_2}\n");
-                break;
-            }
+            setupargs.push("mov var[%{_2}], @_start%{_2}\n");
         };
 
-        startup += "\nfunc _start\n" + setupargs.join('') + "call main\nret\n";
+        startup += "\nfunc _start\n" + setupargs.join('') + "call main\nret\n@line 1\n";
         var ret;
         parser.parse(startup + asmcode.trimRight() + '\n', { &(r)
             ret = r;

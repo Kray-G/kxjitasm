@@ -28,6 +28,10 @@ Roughly the structure is like the following.
   * It is a `LABEL:` style and it means a location mark like a destination of jump.
 * Function Entry Point
   * This is like a label, but it only means an entry point to a function.
+  * The special entry point of `main` is needed.
+    * The `main` will work like `int main(int argc, char** argv)` in C.
+    * `argc` is passed to the register of `s0`, and `argv` is passed to the register of `s1`.
+    * The address is stored with 8 bytes, so the address to the 1st argument will be `[s1]`, and the 2nd argument will be `[s1+8]`.
 * Instructions
   * Instructions are mostly defined just corresponding to a function in SLJIT.
 * Alternative Representation
@@ -177,9 +181,40 @@ The following table shows the list of mnemonic in this JIT assembler.
 | `lshr32`    | DST, OP1, OP2   | DST := OP1 \>\> OP2 (logical)                         | for 32 bit                                 |
 | `ashr32`    | DST, OP1, OP2   | DST := OP1 \>\> OP2 (arithmetic)                      | for 32 bit                                 |
 
+### Operand
+
+The operand will be a register, a memory addressing, an immediate value, a data label, or a variable.
+
+A register is represented by `s` or `r` with the number such as `s0`. The number should be represented from 0 to 6 for each. The register of `s` means a saved register, that is why the value in a register will be saved even after calling another function. However, when it is the register of `r`, it means a scratch register, so it might be destroyed when calling another function.
+
+Arounding `[` and `]` means a memory addressing way, and you can put a register and its offset between `[` and `]` like `[s0 + 8]`. An immediate value is like just 0, 1, 100, 0.1, 0.2, or something like that. It is needed to be an integer or a double precision value. A data label is like `@fmt`, and it will be started with `@` and the label name will follow it. This label should be defined former than using it.
+
+A variable is written like `var[N]`, and `N` should be an integer value. The variable area will be automatically reserved in use. So if you want to reserve the area of variables that you are going to use in advance, you can do the following.
+
+```asm
+    mov r0, var[10]     # Reserved an area of 10 variables in advance.
+```
+
+Also if you want to use a register as an offset to access the variable, you can use a `localbase` instruction. Here is an example.
+
+```asm
+    localbase r0, 2
+    mov r0, [r0]
+    # mov r0, var[2]
+```
+
+Please note, when it is `localbase store, offset` and the `offset` is a register, a value in the register will be broken, in fact that the value will be multiplied by 8. So do not use a `s` register as an offset.
+
 ### Alternatives
 
-Some instructions could be replaced by alternative way. Look at the following table, and you can use an alternative for more readable.
+Some instructions could be replaced by alternative way. For example, the following 2 lines are the same meaning.
+
+```asm
+    eq LABEL, OP1, OP2
+    if OP1 == OP2 goto LABEL
+```
+
+Look at the following table for details, and you can use an alternative for more readable in this way.
 
 |       Original        |            Alternative            |
 | --------------------- | --------------------------------- |
