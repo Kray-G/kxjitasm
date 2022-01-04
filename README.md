@@ -203,8 +203,6 @@ Also if you want to use a register as an offset to access the variable, you can 
     # mov r0, var[2]
 ```
 
-Please note, when it is `localbase store, offset` and the `offset` is a register, a value in the register will be broken, in fact that the value will be multiplied by 8. So do not use a `s` register as an offset.
-
 ### Alternatives
 
 Some instructions could be replaced by alternative way. For example, the following 2 lines are the same meaning.

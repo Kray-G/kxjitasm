@@ -1,10 +1,10 @@
 load lib kxjit
 load func jit_test
 
-# Constant Data Store
+; Constant Data Store
     @msg "This is a JIT message, successful!\n"
 
-# main(int s0, char** s1)
+; main(int s0, char** s1)
 func main
     if s0 == 0 goto end
     mov r0, [s1]

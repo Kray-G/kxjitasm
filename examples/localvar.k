@@ -10,8 +10,7 @@ func main
     mov s0, 0
     goto loop1
   next1:
-    mov r0, s0
-    localbase r3, r0
+    localbase r3, s0
     mov r0, s0
     mul r0, r0, 100
     mov [r3], r0
@@ -23,8 +22,7 @@ func main
     mov s0, 10
     goto loop2
   next2:
-    mov r0, s0
-    localbase r3, r0
+    localbase r3, s0
     mov r2, [r3]
     mov r1, s0
     mov r0, @fmt

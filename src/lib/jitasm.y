@@ -27,18 +27,22 @@ lines
     ;
 
 line
-    : '\n' /* empty line */ { $$ = null; }
-    | '@' LINE INT '\n' { @setLine($3.value); }
-    | LABEL ':' '\n' { $$ = { "cmd": LABEL, "name": "label", "operand": [{ "name": $1.value }] }; }
-    | FUNC LABEL '\n' { $$ = { "cmd": FUNC, "name": "func", "operand": [{ "name": $2.value }] }; }
-    | CMD operands_Opt '\n' { $$ = { "cmd": $1.value, "name": $1.name, "operand": $2 }; }
-    | LOCALBASE operands '\n' { $$ = { "cmd": LOCALBASE, "name": "localbase", "operand": $2 }; }
-    | JMP LABEL '\n' { $$ = { "cmd": JMP, "name": "jmp", "operand": [{ "name": $2.value }] }; }
-    | LOAD FUNC LABEL '\n' { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": $3.value }] }; }
-    | LOAD LIB LABEL '\n' { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": $3.value }] }; }
-    | '@' LABEL data '\n' { $$ = { "cmd": DATA, "name": "data", "operand": [{ "name": $2.value, "value": $3.value }] }; }
-    | alternatives '\n'
+    : actline '\n'
     | error '\n' { $$.error = true; }
+    ;
+
+actline
+    : /* empty line */ { $$ = null; }
+    | '@' LINE INT { @setLine($3.value); }
+    | LABEL ':' { $$ = { "cmd": LABEL, "name": "label", "operand": [{ "name": $1.value }] }; }
+    | FUNC LABEL { $$ = { "cmd": FUNC, "name": "func", "operand": [{ "name": $2.value }] }; }
+    | CMD operands_Opt { $$ = { "cmd": $1.value, "name": $1.name, "operand": $2 }; }
+    | LOCALBASE operands { $$ = { "cmd": LOCALBASE, "name": "localbase", "operand": $2 }; }
+    | JMP LABEL { $$ = { "cmd": JMP, "name": "jmp", "operand": [{ "name": $2.value }] }; }
+    | LOAD FUNC LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": FUNC, "name": $3.value }] }; }
+    | LOAD LIB LABEL { $$ = { "cmd": LOAD, "name": "load", "operand": [{ "type": LIB, "name": $3.value }] }; }
+    | '@' LABEL data { $$ = { "cmd": DATA, "name": "data", "operand": [{ "name": $2.value, "value": $3.value }] }; }
+    | alternatives
     ;
 
 data
@@ -109,7 +113,7 @@ class Jitasm(opts_) {
     private initialize() {
         /* Lexical analyzer */
         lexer_ = new Kacc.Lexer();
-        lexer_.addSkip(/[ \t\r]+|#[^\n]+/);
+        lexer_.addSkip(/[ \t\r]+|[#;][^\n]+/);
         lexer_.addKeyword("line", LINE);
         lexer_.addKeyword("load", LOAD);
         lexer_.addKeyword("==", OPEQ);
