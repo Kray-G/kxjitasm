@@ -37,7 +37,7 @@ Roughly the structure is like the following.
 * Alternative Representation
   * It would be more readable for the human.
 * Comment
-  * A comment will be started with `#` and it is continued until the end of line.
+  * A comment will be started with `#` or `;`, and it is continued until the end of line.
 
 ### Example
 
