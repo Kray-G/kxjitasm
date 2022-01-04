@@ -114,7 +114,7 @@ class Jitasm(opts_) {
         lexer_.addKeyword("load", LOAD);
         lexer_.addKeyword("==", OPEQ);
         lexer_.addKeyword("!=", OPNEQ);
-        lexer_.addRule(/>=/, OPGE); // it doesn't work with keyword. workaround.
+        lexer_.addKeyword(">=", OPGE);
         lexer_.addKeyword("<=", OPLE);
         lexer_.addKeyword("if", IF);
         lexer_.addKeyword("signed", SIGNED);
@@ -498,6 +498,7 @@ class Jitasm(opts_) {
         var lineNumber = 1;
         var parser = new Kacc.Parser(lexer_, {
             yyerror: &(msg) => {
+                System.println(("Error: " + msg).red().bold());
                 error_ = true;
             },
             nextLine: &() => {
