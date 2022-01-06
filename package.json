@@ -1,4 +1,6 @@
 {
-    "name": "jitasm"
+    "name": "jitasm",
+    "dependencies": {
+        "kinx": ">=1.1.2"
+    }
 }
-
