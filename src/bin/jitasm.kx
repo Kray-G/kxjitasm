@@ -1,5 +1,7 @@
-
+using pkg.Utils;
 using @jitasm.Jitasm;
+
+pkg.check(__FILE__);
 
 function usage() {
     $stderr.println("Usage: kxjitasm [-hdrxm] asm.k");
@@ -11,7 +13,6 @@ function usage() {
     return 1;
 }
 
-const isWindows = System.PLATFORM.endsWith("-WIN");
 var file, opt, opts, progargs = [];
 var args = $$;
 args.shift();
@@ -37,7 +38,7 @@ while (opt = System.getopt(args, "hdrx", { debug: '=' })) {
         break;
     case '-': {
         if (file.isUndefined) {
-            file = isWindows ? opt.arg.replace("\\", "/") : opt.arg;
+            file = System.isWindows ? opt.arg.replace("\\", "/") : opt.arg;
             if (!File.exists(file)) {
                 $stderr.println("File not found: " + file);
                 return 1;
